@@ -98,35 +98,31 @@ const StepSummary = () => {
               </div>
               <div className="text-sm font-medium text-foreground">{state.operadora?.name || "—"}</div>
             </div>
-            <div className="glass-card rounded-xl p-4">
+            <div className="glass-card rounded-xl p-4 col-span-2">
               <div className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1 mb-2">
-                <FileText className="w-3 h-3" /> Procedimento
+                <FileText className="w-3 h-3" /> Procedimentos
               </div>
               <div className="text-sm font-medium text-foreground">{state.selectedProcedure?.name || "—"}</div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">{state.selectedProcedure?.code}</div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">{state.selectedProcedure?.code} · Principal</div>
+              {state.linkedProcedures.length > 0 && (
+                <div className="mt-2 pt-2 border-t border-border/50 space-y-1">
+                  {state.linkedProcedures.map((code) => {
+                    const proc = mockLinkedProcedures.find((p) => p.code === code);
+                    return proc ? (
+                      <div key={code} className="flex items-center justify-between py-1 text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3 h-3 text-success" />
+                          <span className="text-foreground">{proc.name}</span>
+                          <span className="text-muted-foreground">· {proc.code}</span>
+                        </div>
+                        <span className={cn("font-semibold", proc.rentabilityDelta.startsWith("+") ? "text-success" : "text-destructive")}>{proc.rentabilityDelta}</span>
+                      </div>
+                    ) : null;
+                  })}
+                </div>
+              )}
             </div>
           </div>
-
-          {/* Linked procedures */}
-          {state.linkedProcedures.length > 0 && (
-            <div className="glass-card rounded-xl p-4">
-              <div className="text-xs font-semibold text-foreground mb-2">Procedimentos Atrelados ({state.linkedProcedures.length})</div>
-              <div className="space-y-1">
-                {state.linkedProcedures.map((code) => {
-                  const proc = mockLinkedProcedures.find((p) => p.code === code);
-                  return proc ? (
-                    <div key={code} className="flex items-center justify-between py-1.5 text-xs">
-                      <div className="flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3 h-3 text-success" />
-                        <span className="text-foreground">{proc.name}</span>
-                      </div>
-                      <span className={cn("font-semibold", proc.rentabilityDelta.startsWith("+") ? "text-success" : "text-destructive")}>{proc.rentabilityDelta}</span>
-                    </div>
-                  ) : null;
-                })}
-              </div>
-            </div>
-          )}
 
           {/* Documents */}
           <div className="glass-card rounded-xl p-4">
