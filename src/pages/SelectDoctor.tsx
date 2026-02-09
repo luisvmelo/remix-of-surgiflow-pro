@@ -4,7 +4,8 @@ import { useSurgical } from "@/contexts/SurgicalContext";
 import { mockDoctors } from "@/lib/mockData";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Stethoscope, ArrowRight, Activity, Circle } from "lucide-react";
+import { Search, Stethoscope, ArrowRight, Activity, Circle, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const SelectDoctor = () => {
   const [search, setSearch] = useState("");
@@ -26,12 +27,18 @@ const SelectDoctor = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card px-6 py-4 flex items-center gap-3">
-        <Activity className="w-6 h-6 text-primary" />
-        <span className="font-bold text-lg text-foreground">SolicitaCirurg</span>
+        <button onClick={() => navigate("/home")} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <Activity className="w-6 h-6 text-primary" />
+          <span className="font-bold text-lg text-foreground">SolicitaCirurg</span>
+        </button>
       </header>
       <div className="max-w-3xl mx-auto px-6 py-12">
+        <div className="flex items-center gap-3 mb-2">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/home")} className="gap-1.5">
+            <ArrowLeft className="w-4 h-4" /> Voltar
+          </Button>
+        </div>
         <h1 className="text-3xl font-bold text-foreground mb-2">Selecionar Médico</h1>
-        <p className="text-muted-foreground mb-8">Escolha o médico responsável por esta solicitação</p>
 
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
