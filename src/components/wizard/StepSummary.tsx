@@ -85,7 +85,12 @@ const StepSummary = () => {
                 <User className="w-3 h-3" /> Paciente
               </div>
               <div className="text-sm font-medium text-foreground">{state.patient?.name || "—"}</div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">{state.patient?.cpf}</div>
+              <div className="text-[10px] text-muted-foreground mt-1 space-y-0.5">
+                <div>CPF: {state.patient?.cpf || "—"}</div>
+                <div>Nascimento: {state.patient?.birthDate ? new Date(state.patient.birthDate + "T12:00:00").toLocaleDateString("pt-BR") : "—"}</div>
+                <div>Tel: {state.patient?.phone || "—"}</div>
+                <div>Mãe: {state.patient?.motherName || "—"}</div>
+              </div>
             </div>
             <div className="glass-card rounded-xl p-4">
               <div className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1 mb-2">
