@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useSurgical } from "@/contexts/SurgicalContext";
 import { mockRecommendedOPMEs } from "@/lib/mockData";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2, Plus, ArrowRight, AlertTriangle, FileImage, ZoomIn, ZoomOut, Copy, CheckCircle2, Package, TrendingDown, TrendingUp } from "lucide-react";
+import { Trash2, Plus, ArrowRight, AlertTriangle, FileImage, ZoomIn, ZoomOut, Copy, CheckCircle2, Package, TrendingDown, TrendingUp, ArrowLeftRight, ShieldCheck, ShieldAlert, CircleDot } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type ExtractedItem = {
   id: string;
@@ -16,12 +17,80 @@ type ExtractedItem = {
   status: string;
 };
 
+type ItemInsight = {
+  match: "exact" | "similar" | "none";
+  matchedOpme?: typeof mockRecommendedOPMEs[0];
+  verdict: "best" | "replaceable" | "offender" | "gloss-risk" | "neutral";
+  label: string;
+  color: string;
+  borderColor: string;
+  icon: "check" | "swap" | "alert" | "warning" | "neutral";
+};
+
+const getItemInsight = (item: ExtractedItem): ItemInsight => {
+  const nameLower = item.name.toLowerCase();
+  
+  // Try exact or partial match against recommended OPMEs
+  const exactMatch = mockRecommendedOPMEs.find(o => o.name.toLowerCase() === nameLower);
+  const similarMatch = !exactMatch ? mockRecommendedOPMEs.find(o => {
+    const oWords = o.name.toLowerCase().split(/\s+/);
+    const iWords = nameLower.split(/\s+/);
+    const common = oWords.filter(w => iWords.some(iw => iw.includes(w) || w.includes(iw)));
+    return common.length >= 2;
+  }) : undefined;
+  
+  const matched = exactMatch || similarMatch;
+  
+  if (!matched) {
+    return { match: "none", verdict: "neutral", label: "Sem referência", color: "text-muted-foreground", borderColor: "border-border", icon: "neutral" };
+  }
+
+  if (matched.isOfensor && matched.isGlosado) {
+    return { match: exactMatch ? "exact" : "similar", matchedOpme: matched, verdict: "offender", label: "Prejuízo — substituir", color: "text-destructive", borderColor: "border-destructive/40", icon: "alert" };
+  }
+  if (matched.isOfensor) {
+    return { match: exactMatch ? "exact" : "similar", matchedOpme: matched, verdict: "offender", label: "Ofensor — considere trocar", color: "text-destructive", borderColor: "border-destructive/40", icon: "alert" };
+  }
+  if (matched.isGlosado) {
+    return { match: exactMatch ? "exact" : "similar", matchedOpme: matched, verdict: "gloss-risk", label: "Risco de glosa", color: "text-warning", borderColor: "border-warning/40", icon: "warning" };
+  }
+  if (matched.improvesRent) {
+    return { match: exactMatch ? "exact" : "similar", matchedOpme: matched, verdict: "best", label: "Melhor opção", color: "text-success", borderColor: "border-success/40", icon: "check" };
+  }
+  
+  // Has a match, check if there's a better alternative
+  const betterAlt = mockRecommendedOPMEs.find(o => o.improvesRent && !o.isOfensor && !o.isGlosado && o.name !== matched.name);
+  if (betterAlt) {
+    return { match: exactMatch ? "exact" : "similar", matchedOpme: matched, verdict: "replaceable", label: "Pode ser substituído", color: "text-info", borderColor: "border-info/40", icon: "swap" };
+  }
+
+  return { match: exactMatch ? "exact" : "similar", matchedOpme: matched, verdict: "neutral", label: "OK", color: "text-muted-foreground", borderColor: "border-border", icon: "neutral" };
+};
+
+const InsightIcon = ({ insight }: { insight: ItemInsight }) => {
+  switch (insight.icon) {
+    case "check": return <ShieldCheck className="w-4 h-4" />;
+    case "alert": return <ShieldAlert className="w-4 h-4" />;
+    case "warning": return <AlertTriangle className="w-4 h-4" />;
+    case "swap": return <ArrowLeftRight className="w-4 h-4" />;
+    default: return <CircleDot className="w-4 h-4" />;
+  }
+};
+
 const StepConference = () => {
   const { state, updateState, setStep } = useSurgical();
   const [items, setItems] = useState<ExtractedItem[]>(
     state.extractedItems.length > 0 ? [...state.extractedItems] : []
   );
   const [zoom, setZoom] = useState(100);
+
+  const itemInsights = useMemo(() => {
+    const map = new Map<string, ItemInsight>();
+    items.forEach(item => {
+      if (item.name.trim()) map.set(item.id, getItemInsight(item));
+    });
+    return map;
+  }, [items]);
 
   const removeItem = (id: string) => setItems((prev) => prev.filter((i) => i.id !== id));
 
@@ -160,8 +229,10 @@ const StepConference = () => {
         <div className="flex-1 overflow-y-auto">
           {/* Editable items */}
           <div className="p-4 space-y-2">
+            <TooltipProvider delayDuration={200}>
             {items.map((item, idx) => {
               const isDuplicate = items.findIndex((i) => i.name === item.name && i.name !== "") < idx;
+              const insight = item.name.trim() ? itemInsights.get(item.id) : undefined;
               return (
                 <div
                   key={item.id}
@@ -169,11 +240,34 @@ const StepConference = () => {
                     "glass-card rounded-lg p-3 transition-all",
                     item.uncertain && "border-warning/40",
                     isDuplicate && "border-destructive/40 bg-destructive/5",
-                    !item.name.trim() && "border-destructive/40"
+                    !item.name.trim() && "border-destructive/40",
+                    insight && insight.verdict !== "neutral" && insight.borderColor
                   )}
                 >
                   <div className="flex gap-2 items-center">
-                    <span className="text-xs text-muted-foreground w-5 shrink-0 text-center">{idx + 1}</span>
+                    {/* Insight indicator */}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className={cn(
+                          "w-6 h-6 shrink-0 rounded-full flex items-center justify-center text-xs transition-colors",
+                          insight?.verdict === "best" && "bg-success/15 text-success",
+                          insight?.verdict === "offender" && "bg-destructive/15 text-destructive",
+                          insight?.verdict === "gloss-risk" && "bg-warning/15 text-warning",
+                          insight?.verdict === "replaceable" && "bg-info/15 text-info",
+                          (!insight || insight.verdict === "neutral") && "bg-muted text-muted-foreground",
+                        )}>
+                          {insight ? <InsightIcon insight={insight} /> : <span>{idx + 1}</span>}
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="left" className="max-w-[220px]">
+                        <p className="font-medium text-xs">{insight?.label || "Sem análise"}</p>
+                        {insight?.matchedOpme && (
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            Ref: {insight.matchedOpme.name} ({insight.matchedOpme.impactDelta})
+                          </p>
+                        )}
+                      </TooltipContent>
+                    </Tooltip>
                     <Input
                       value={item.name}
                       onChange={(e) => updateItem(item.id, "name", e.target.value)}
@@ -197,10 +291,21 @@ const StepConference = () => {
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
-                  {isDuplicate && <p className="text-[10px] text-destructive ml-6 mt-1">⚠ Item duplicado</p>}
+                  {/* Status line */}
+                  <div className="flex items-center gap-2 ml-8 mt-1.5">
+                    {insight && insight.verdict !== "neutral" && (
+                      <span className={cn("text-[10px] font-medium flex items-center gap-1", insight.color)}>
+                        <InsightIcon insight={insight} />
+                        {insight.label}
+                        {insight.matchedOpme && <span className="text-muted-foreground ml-1">({insight.matchedOpme.impactDelta})</span>}
+                      </span>
+                    )}
+                    {isDuplicate && <span className="text-[10px] text-destructive">⚠ Item duplicado</span>}
+                  </div>
                 </div>
               );
             })}
+            </TooltipProvider>
             <button
               onClick={addItem}
               className="w-full border-2 border-dashed rounded-lg p-3 text-sm text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all flex items-center justify-center gap-2"
