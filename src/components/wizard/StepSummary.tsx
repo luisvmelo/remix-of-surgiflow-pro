@@ -1,8 +1,25 @@
 import { useSurgical } from "@/contexts/SurgicalContext";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Download, Save, TrendingUp, AlertTriangle, Shield, User, Stethoscope, Building, FileText, Package, Send, BarChart3 } from "lucide-react";
-import { mockLinkedProcedures } from "@/lib/mockData";
+import { CheckCircle2, Download, Save, TrendingUp, AlertTriangle, Shield, User, Stethoscope, Building, FileText, Package, Send, BarChart3, ShieldCheck, ShieldAlert, ArrowLeftRight, CircleDot } from "lucide-react";
+import { mockLinkedProcedures, mockRecommendedOPMEs } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
+
+const getItemVerdict = (name: string) => {
+  const nameLower = name.toLowerCase();
+  const exact = mockRecommendedOPMEs.find(o => o.name.toLowerCase() === nameLower);
+  const similar = !exact ? mockRecommendedOPMEs.find(o => {
+    const oW = o.name.toLowerCase().split(/\s+/);
+    const iW = nameLower.split(/\s+/);
+    return oW.filter(w => iW.some(iw => iw.includes(w) || w.includes(iw))).length >= 2;
+  }) : undefined;
+  const matched = exact || similar;
+  if (!matched) return null;
+  if (matched.isOfensor && matched.isGlosado) return { label: "Prejuízo", color: "text-destructive", bg: "bg-destructive/10", icon: ShieldAlert };
+  if (matched.isOfensor) return { label: "Ofensor", color: "text-destructive", bg: "bg-destructive/10", icon: ShieldAlert };
+  if (matched.isGlosado) return { label: "Risco glosa", color: "text-warning", bg: "bg-warning/10", icon: AlertTriangle };
+  if (matched.improvesRent) return { label: "Melhor opção", color: "text-success", bg: "bg-success/10", icon: ShieldCheck };
+  return { label: "OK", color: "text-muted-foreground", bg: "bg-muted", icon: CircleDot };
+};
 
 const StepSummary = () => {
   const { state } = useSurgical();
@@ -150,15 +167,30 @@ const StepSummary = () => {
               <span className="text-xs font-semibold text-foreground">Itens / OPMEs ({state.extractedItems.length})</span>
             </div>
             <div className="space-y-1 max-h-[450px] overflow-y-auto pr-1">
-              {state.extractedItems.map((item) => (
-                <div key={item.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/50 text-xs">
-                  <div>
-                    <span className="font-medium text-foreground">{item.name}</span>
-                    {item.supplier && <span className="text-muted-foreground ml-1.5">· {item.supplier}</span>}
+              {state.extractedItems.map((item) => {
+                const verdict = getItemVerdict(item.name);
+                const Icon = verdict?.icon;
+                return (
+                  <div key={item.id} className={cn("flex items-center justify-between py-2 px-3 rounded-lg text-xs", verdict?.bg || "bg-muted/50")}>
+                    <div className="flex items-center gap-2 min-w-0">
+                      {Icon && <Icon className={cn("w-3.5 h-3.5 shrink-0", verdict?.color)} />}
+                      <span className="font-medium text-foreground truncate">{item.name}</span>
+                      {item.supplier && <span className="text-muted-foreground shrink-0">· {item.supplier}</span>}
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0 ml-2">
+                      {verdict && verdict.label !== "OK" && (
+                        <span className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded-full border", 
+                          verdict.label === "Melhor opção" && "badge-success",
+                          verdict.label === "Ofensor" && "badge-danger",
+                          verdict.label === "Prejuízo" && "badge-danger",
+                          verdict.label === "Risco glosa" && "badge-warning",
+                        )}>{verdict.label}</span>
+                      )}
+                      <span className="text-muted-foreground">Qtd: {item.quantity}</span>
+                    </div>
                   </div>
-                  <span className="text-muted-foreground shrink-0 ml-2">Qtd: {item.quantity}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
