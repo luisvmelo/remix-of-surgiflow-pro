@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, UserPlus, UserCheck, ArrowRight, ChevronDown } from "lucide-react";
+import { Search, UserPlus, UserCheck, ArrowRight, Pencil } from "lucide-react";
 
 const StepPatient = () => {
   const { state, updateState, setStep } = useSurgical();
@@ -13,6 +13,11 @@ const StepPatient = () => {
   const [selectedPatient, setSelectedPatient] = useState(state.patient);
   const [operadoraId, setOperadoraId] = useState(state.operadora?.id || "");
   const [showNew, setShowNew] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editCpf, setEditCpf] = useState("");
+  const [editBirth, setEditBirth] = useState("");
+  const [editPhone, setEditPhone] = useState("");
   const [newName, setNewName] = useState("");
   const [newCpf, setNewCpf] = useState("");
   const [newBirth, setNewBirth] = useState("");
@@ -27,6 +32,22 @@ const StepPatient = () => {
       )
     : [];
 
+  const startEditing = () => {
+    if (!selectedPatient) return;
+    setEditName(selectedPatient.name);
+    setEditCpf(selectedPatient.cpf);
+    setEditBirth(selectedPatient.birthDate);
+    setEditPhone(selectedPatient.phone);
+    setEditing(true);
+  };
+
+  const confirmEdit = () => {
+    if (selectedPatient) {
+      setSelectedPatient({ ...selectedPatient, name: editName, cpf: editCpf, birthDate: editBirth, phone: editPhone });
+    }
+    setEditing(false);
+  };
+
   const handleNext = () => {
     const operadora = mockOperadoras.find((o) => o.id === operadoraId) || null;
     const patient = selectedPatient || (showNew ? { id: "new", name: newName, cpf: newCpf, birthDate: newBirth, phone: newPhone, motherName: "", operadoraId } : null);
@@ -36,7 +57,7 @@ const StepPatient = () => {
     }
   };
 
-  const canProceed = (selectedPatient || (showNew && newName && newPhone)) && operadoraId;
+  const canProceed = (selectedPatient || (showNew && newName && newPhone)) && operadoraId && !editing;
 
   return (
     <div className="max-w-3xl mx-auto p-6 lg:p-8">
@@ -90,16 +111,52 @@ const StepPatient = () => {
       </div>
 
       {/* Selected patient card */}
-      {selectedPatient && (
+      {selectedPatient && !editing && (
         <div className="glass-card rounded-xl p-5 mb-6 animate-fade-in border-l-4 border-l-primary">
-          <Label className="text-sm font-semibold mb-3 block flex items-center gap-2">
-            <UserCheck className="w-4 h-4 text-primary" /> Paciente Selecionado
-          </Label>
+          <div className="flex items-center justify-between mb-3">
+            <Label className="text-sm font-semibold flex items-center gap-2">
+              <UserCheck className="w-4 h-4 text-primary" /> Paciente Selecionado
+            </Label>
+            <Button variant="ghost" size="sm" onClick={startEditing} className="text-xs gap-1.5">
+              <Pencil className="w-3.5 h-3.5" /> Editar
+            </Button>
+          </div>
           <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
             <div><span className="text-muted-foreground">Nome:</span> <span className="font-medium text-foreground">{selectedPatient.name}</span></div>
             <div><span className="text-muted-foreground">CPF:</span> <span className="font-medium text-foreground">{selectedPatient.cpf}</span></div>
             <div><span className="text-muted-foreground">Nascimento:</span> <span className="font-medium text-foreground">{selectedPatient.birthDate}</span></div>
             <div><span className="text-muted-foreground">Telefone:</span> <span className="font-medium text-foreground">{selectedPatient.phone}</span></div>
+          </div>
+        </div>
+      )}
+
+      {/* Editing selected patient */}
+      {selectedPatient && editing && (
+        <div className="glass-card rounded-xl p-5 mb-6 animate-fade-in border-l-4 border-l-accent">
+          <Label className="text-sm font-semibold mb-4 block flex items-center gap-2">
+            <Pencil className="w-4 h-4 text-accent" /> Editar Paciente
+          </Label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Nome completo *</Label>
+              <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">CPF</Label>
+              <Input value={editCpf} onChange={(e) => setEditCpf(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Data de Nascimento</Label>
+              <Input type="date" value={editBirth} onChange={(e) => setEditBirth(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Telefone *</Label>
+              <Input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>Cancelar</Button>
+            <Button size="sm" onClick={confirmEdit} disabled={!editName || !editPhone}>Salvar alterações</Button>
           </div>
         </div>
       )}
