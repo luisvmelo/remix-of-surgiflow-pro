@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { WizardState, WizardStep, mockExtractedItems, mockDocuments } from "@/lib/mockData";
+import { WizardState, WizardStep, mockDocuments } from "@/lib/mockData";
 
 interface SurgicalContextType {
   state: WizardState;
@@ -25,6 +25,8 @@ const initialState: WizardState = {
   documents: mockDocuments,
   rentabilityScore: 0,
   glossRisk: 0,
+  historicalPercentile: 0,
+  bestPossible: 0,
 };
 
 export function SurgicalProvider({ children }: { children: ReactNode }) {
