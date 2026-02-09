@@ -92,11 +92,7 @@ const Homepage = () => {
 
   const handleNewRequest = () => {
     resetWizard();
-    if (state.doctor) {
-      navigate("/wizard");
-    } else {
-      navigate("/select-doctor");
-    }
+    navigate("/select-doctor");
   };
 
   const formatDate = (dateStr: string) => {
