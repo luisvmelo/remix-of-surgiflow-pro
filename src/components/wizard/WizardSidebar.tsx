@@ -1,14 +1,13 @@
 import { useSurgical } from "@/contexts/SurgicalContext";
 import { WizardStep } from "@/lib/mockData";
-import { Check, AlertCircle, User, Upload, FileCheck, Brain, FileText, ClipboardList } from "lucide-react";
+import { Check, AlertCircle, User, Upload, FileCheck, FileText, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const steps: { label: string; icon: React.ElementType; step: WizardStep }[] = [
   { label: "Paciente", icon: User, step: 1 },
   { label: "Upload Guia", icon: Upload, step: 2 },
   { label: "Conferência", icon: FileCheck, step: 3 },
-  { label: "Análises", icon: Brain, step: 4 },
-  { label: "Documentos", icon: FileText, step: 5 },
+  { label: "Documentos", icon: FileText, step: 4 },
 ];
 
 const WizardSidebar = () => {
@@ -61,14 +60,17 @@ const WizardSidebar = () => {
         })}
         {/* Summary */}
         <button
-          onClick={() => state.currentStep >= 5 && setStep(5)}
+          onClick={() => state.currentStep >= 5 && setStep(5 as WizardStep)}
           className={cn(
             "w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all text-left mt-4 border-t pt-4",
-            "text-muted-foreground/50 cursor-not-allowed"
+            state.currentStep >= 5 ? "text-foreground hover:bg-muted" : "text-muted-foreground/50 cursor-not-allowed"
           )}
-          disabled
+          disabled={state.currentStep < 5}
         >
-          <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-muted text-muted-foreground">
+          <div className={cn(
+            "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
+            state.currentStep >= 5 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+          )}>
             <ClipboardList className="w-4 h-4" />
           </div>
           <span>Resumo Final</span>

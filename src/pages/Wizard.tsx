@@ -4,7 +4,6 @@ import RentabilityIndicator from "@/components/wizard/RentabilityIndicator";
 import StepPatient from "@/components/wizard/StepPatient";
 import StepUpload from "@/components/wizard/StepUpload";
 import StepConference from "@/components/wizard/StepConference";
-import StepRecommendations from "@/components/wizard/StepRecommendations";
 import StepDocuments from "@/components/wizard/StepDocuments";
 import StepSummary from "@/components/wizard/StepSummary";
 import { Activity } from "lucide-react";
@@ -14,7 +13,6 @@ const stepComponents = [
   StepPatient,
   StepUpload,
   StepConference,
-  StepRecommendations,
   StepDocuments,
 ];
 
@@ -24,8 +22,8 @@ const Wizard = () => {
 
   if (step === 0) return null;
 
-  const StepComponent = step <= 5 ? stepComponents[step] : null;
-  const showSummary = step > 5;
+  const StepComponent = step <= 4 ? stepComponents[step] : null;
+  const showSummary = step > 4;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

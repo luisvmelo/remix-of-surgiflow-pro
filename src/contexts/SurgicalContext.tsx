@@ -43,7 +43,7 @@ export function SurgicalProvider({ children }: { children: ReactNode }) {
       case 1: return state.patient && state.operadora ? "done" : step < state.currentStep ? "error" : "pending";
       case 2: return state.uploadedFile ? "done" : step < state.currentStep ? "error" : "pending";
       case 3: return state.confirmedItems ? "done" : step < state.currentStep ? "error" : "pending";
-      case 4: return state.selectedProcedure ? "done" : step < state.currentStep ? "error" : "pending";
+      case 4: return state.documents.some(d => d.attached) ? "done" : step < state.currentStep ? "error" : "pending";
       case 5: return step < state.currentStep ? "done" : "pending";
       default: return "pending";
     }

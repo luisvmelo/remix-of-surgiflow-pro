@@ -14,8 +14,7 @@ const StepDocuments = () => {
   };
 
   const handleFinish = () => {
-    updateState({ documents: docs, currentStep: 6 as any, rentabilityScore: state.rentabilityScore, glossRisk: state.glossRisk });
-    updateState({ currentStep: 6 as any });
+    updateState({ documents: docs, currentStep: 5 as any });
   };
 
   const attachedCount = docs.filter((d) => d.attached).length;
