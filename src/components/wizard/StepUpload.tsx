@@ -1,10 +1,10 @@
 import { useState, useCallback } from "react";
 import { useSurgical } from "@/contexts/SurgicalContext";
-import { mockExtractedItems, mockProcedures, mockLinkedProcedures, mockRecommendedOPMEs } from "@/lib/mockData";
+import { mockExtractedItems, mockProcedures, mockLinkedProcedures } from "@/lib/mockData";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, CheckCircle2, AlertTriangle, Loader2, FileUp, Stethoscope, Search, Plus, Minus, TrendingDown, Zap, Package } from "lucide-react";
+import { Upload, CheckCircle2, AlertTriangle, Loader2, FileUp, Stethoscope, Search, Plus, Minus, TrendingDown, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const StepUpload = () => {
@@ -214,54 +214,7 @@ const StepUpload = () => {
         </div>
       )}
 
-      {/* OPMEs recommended for this procedure + operadora */}
-      {selectedProc && (
-        <div className="glass-card rounded-xl p-5 mb-6 animate-fade-in">
-          <Label className="text-sm font-semibold mb-1 block flex items-center gap-2">
-            <Package className="w-4 h-4 text-primary" /> OPMEs Comuns para este Procedimento
-          </Label>
-          <p className="text-xs text-muted-foreground mb-4">
-            Itens frequentes para <strong className="text-foreground">{selectedProc.name}</strong> na <strong className="text-foreground">{state.operadora?.name}</strong>
-          </p>
-          <div className="space-y-2">
-            {[...mockRecommendedOPMEs]
-              .sort((a, b) => {
-                if (a.doctorUses && !b.doctorUses) return -1;
-                if (!a.doctorUses && b.doctorUses) return 1;
-                return 0;
-              })
-              .map((opme, idx) => (
-              <div
-                key={idx}
-                className="flex items-center gap-3 p-3 rounded-lg border border-border hover:border-muted-foreground/20 transition-all"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-foreground text-sm">{opme.name}</div>
-                  <div className="text-xs text-muted-foreground">{opme.supplier}</div>
-                  <div className="flex flex-wrap gap-1.5 mt-1.5">
-                    {opme.doctorUses && <span className="badge-doctor text-[10px] px-2 py-0.5 rounded-full">Seu médico pede</span>}
-                    {opme.isOfensor && <span className="badge-danger text-[10px] px-2 py-0.5 rounded-full flex items-center gap-0.5"><TrendingDown className="w-2.5 h-2.5" /> Ofensor</span>}
-                    {opme.isGlosado && <span className="badge-warning text-[10px] px-2 py-0.5 rounded-full flex items-center gap-0.5"><AlertTriangle className="w-2.5 h-2.5" /> Glosa comum</span>}
-                    {opme.improvesRent && <span className="badge-success text-[10px] px-2 py-0.5 rounded-full">Melhora rentabilidade</span>}
-                    {opme.inGuide && <span className="badge-info text-[10px] px-2 py-0.5 rounded-full">Na guia</span>}
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <div className={cn(
-                    "text-sm font-bold",
-                    opme.impactDelta.startsWith("+") && opme.impactDelta !== "+R$ 0" ? "text-success" : opme.impactDelta.startsWith("-") ? "text-destructive" : "text-muted-foreground"
-                  )}>
-                    {opme.impactDelta}
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">impacto</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
-      {/* Upload area */}
       <div className="glass-card rounded-xl p-5">
         <Label className="text-sm font-semibold mb-4 block flex items-center gap-2">
           <FileUp className="w-4 h-4 text-primary" /> Upload da Guia Médica
