@@ -20,7 +20,7 @@ const SelectDoctor = () => {
 
   const selectDoctor = (doc: typeof mockDoctors[0]) => {
     updateState({ doctor: doc, currentStep: 1 });
-    navigate("/wizard");
+    navigate("/home");
   };
 
   return (
