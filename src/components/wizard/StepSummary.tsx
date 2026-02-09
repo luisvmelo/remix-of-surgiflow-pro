@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useSurgical } from "@/contexts/SurgicalContext";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Download, Save, TrendingUp, AlertTriangle, Shield, User, Stethoscope, Building, FileText, Package, Send, BarChart3, ShieldCheck, ShieldAlert, ArrowLeftRight, CircleDot, ClipboardCheck, Clock, FileWarning } from "lucide-react";
@@ -23,7 +24,8 @@ const getItemVerdict = (name: string) => {
 };
 
 const StepSummary = () => {
-  const { state } = useSurgical();
+  const { state, saveRequest, resetWizard } = useSurgical();
+  const navigate = useNavigate();
 
   const rentColor = state.rentabilityScore > 15 ? "text-success" : state.rentabilityScore > 0 ? "text-warning" : "text-destructive";
   const glossColor = state.glossRisk < 15 ? "text-success" : state.glossRisk < 30 ? "text-warning" : "text-destructive";
@@ -60,13 +62,13 @@ const StepSummary = () => {
           <p className="text-muted-foreground text-sm">Revise todos os dados antes de enviar</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => { saveRequest("draft"); navigate("/home"); }}>
             <Save className="w-4 h-4 mr-1" /> Rascunho
           </Button>
           <Button variant="outline" size="sm">
             <Download className="w-4 h-4 mr-1" /> Pacote
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={() => { saveRequest("awaiting-auth"); resetWizard(); navigate("/home"); }}>
             <Send className="w-4 h-4 mr-1" /> Finalizar
           </Button>
         </div>

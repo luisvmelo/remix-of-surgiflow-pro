@@ -107,3 +107,19 @@ export interface WizardState {
   historicalPercentile: number;
   bestPossible: number;
 }
+
+export interface SavedRequest {
+  id: string;
+  patient: string;
+  operadora: string;
+  procedure: string;
+  code: string;
+  doctor: string;
+  date: string;
+  itemCount: number;
+  status: "draft" | "awaiting-auth" | "docs-pending" | "authorized";
+  statusLabel: string;
+  missingDocs: number;
+  hasOffenders: boolean;
+  hasGlossRisk: boolean;
+}

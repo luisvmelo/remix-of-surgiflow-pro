@@ -77,7 +77,8 @@ const mockPendingProcedures = [
   },
 ];
 
-const statusConfig = {
+const statusConfig: Record<string, { color: string; bg: string; icon: typeof Clock }> = {
+  "draft": { color: "text-muted-foreground", bg: "bg-muted/50 border-border", icon: Clock },
   "awaiting-auth": { color: "text-warning", bg: "bg-warning/10 border-warning/30", icon: Clock },
   "docs-pending": { color: "text-destructive", bg: "bg-destructive/10 border-destructive/30", icon: AlertTriangle },
   "authorized": { color: "text-success", bg: "bg-success/10 border-success/30", icon: CheckCircle2 },
@@ -85,11 +86,13 @@ const statusConfig = {
 
 const Homepage = () => {
   const navigate = useNavigate();
-  const { state, updateState } = useSurgical();
+  const { state, updateState, savedRequests, resetWizard } = useSurgical();
+
+  const allProcedures = [...savedRequests, ...mockPendingProcedures];
 
   const handleNewRequest = () => {
+    resetWizard();
     if (state.doctor) {
-      updateState({ currentStep: 1 });
       navigate("/wizard");
     } else {
       navigate("/select-doctor");
@@ -100,7 +103,7 @@ const Homepage = () => {
     return new Date(dateStr + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
   };
 
-  const hasWarnings = (proc: typeof mockPendingProcedures[0]) => proc.missingDocs > 0 || proc.hasOffenders;
+  const hasWarnings = (proc: { missingDocs: number; hasOffenders: boolean; hasGlossRisk?: boolean }) => proc.missingDocs > 0 || proc.hasOffenders || proc.hasGlossRisk;
 
   return (
     <div className="min-h-screen bg-background">
@@ -124,8 +127,8 @@ const Homepage = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {mockPendingProcedures.map((proc) => {
-            const config = statusConfig[proc.status];
+          {allProcedures.map((proc) => {
+            const config = statusConfig[proc.status] || statusConfig["awaiting-auth"];
             const StatusIcon = config.icon;
             return (
               <div
@@ -176,6 +179,11 @@ const Homepage = () => {
                       {proc.hasOffenders && (
                         <span className="badge-danger text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
                           <AlertTriangle className="w-2.5 h-2.5" /> OPME ofensor
+                        </span>
+                      )}
+                      {"hasGlossRisk" in proc && proc.hasGlossRisk && (
+                        <span className="badge-warning text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <AlertTriangle className="w-2.5 h-2.5" /> Risco de glosa
                         </span>
                       )}
                     </div>
