@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SurgicalProvider } from "@/contexts/SurgicalContext";
 import Login from "./pages/Login";
 import SelectDoctor from "./pages/SelectDoctor";
+import Homepage from "./pages/Homepage";
 import Wizard from "./pages/Wizard";
 import Analises from "./pages/Analises";
 import NotFound from "./pages/NotFound";
@@ -22,6 +23,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/select-doctor" element={<SelectDoctor />} />
+            <Route path="/home" element={<Homepage />} />
             <Route path="/wizard" element={<Wizard />} />
             <Route path="/analises" element={<Analises />} />
             <Route path="*" element={<NotFound />} />
