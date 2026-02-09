@@ -17,14 +17,15 @@ const StepUpload = () => {
     setTimeout(() => {
       setPhase("extracting");
       setTimeout(() => {
-        setPhase("done");
         updateState({
           uploadedFile: name,
           extractedItems: mockExtractedItems,
+          currentStep: 3,
         });
+        setStep(3);
       }, 1200);
     }, 800);
-  }, [updateState]);
+  }, [updateState, setStep]);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
