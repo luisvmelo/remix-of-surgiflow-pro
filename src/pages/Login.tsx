@@ -15,7 +15,7 @@ const Login = () => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setLoggedIn(true);
-    navigate("/select-doctor");
+    navigate("/home");
   };
 
   return (
