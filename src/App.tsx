@@ -7,6 +7,7 @@ import { SurgicalProvider } from "@/contexts/SurgicalContext";
 import Login from "./pages/Login";
 import SelectDoctor from "./pages/SelectDoctor";
 import Wizard from "./pages/Wizard";
+import Analises from "./pages/Analises";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
             <Route path="/" element={<Login />} />
             <Route path="/select-doctor" element={<SelectDoctor />} />
             <Route path="/wizard" element={<Wizard />} />
+            <Route path="/analises" element={<Analises />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
