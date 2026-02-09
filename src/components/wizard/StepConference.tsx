@@ -20,6 +20,7 @@ type ExtractedItem = {
 type ItemInsight = {
   match: "exact" | "similar" | "none";
   matchedOpme?: typeof mockRecommendedOPMEs[0];
+  suggestedReplacement?: typeof mockRecommendedOPMEs[0];
   verdict: "best" | "replaceable" | "offender" | "gloss-risk" | "neutral";
   label: string;
   color: string;
@@ -27,10 +28,19 @@ type ItemInsight = {
   icon: "check" | "swap" | "alert" | "warning" | "neutral";
 };
 
+const findBestAlternative = (exclude?: string) => {
+  return mockRecommendedOPMEs
+    .filter(o => o.improvesRent && !o.isOfensor && !o.isGlosado && o.name !== exclude)
+    .sort((a, b) => {
+      const deltaA = parseInt(a.impactDelta.replace(/[^\d-]/g, "")) || 0;
+      const deltaB = parseInt(b.impactDelta.replace(/[^\d-]/g, "")) || 0;
+      return deltaB - deltaA;
+    })[0];
+};
+
 const getItemInsight = (item: ExtractedItem): ItemInsight => {
   const nameLower = item.name.toLowerCase();
   
-  // Try exact or partial match against recommended OPMEs
   const exactMatch = mockRecommendedOPMEs.find(o => o.name.toLowerCase() === nameLower);
   const similarMatch = !exactMatch ? mockRecommendedOPMEs.find(o => {
     const oWords = o.name.toLowerCase().split(/\s+/);
@@ -42,26 +52,29 @@ const getItemInsight = (item: ExtractedItem): ItemInsight => {
   const matched = exactMatch || similarMatch;
   
   if (!matched) {
-    return { match: "none", verdict: "neutral", label: "Sem referência", color: "text-muted-foreground", borderColor: "border-border", icon: "neutral" };
+    const suggestion = findBestAlternative();
+    return { match: "none", verdict: "neutral", label: "Sem referência", color: "text-muted-foreground", borderColor: "border-border", icon: "neutral", suggestedReplacement: suggestion };
   }
 
   if (matched.isOfensor && matched.isGlosado) {
-    return { match: exactMatch ? "exact" : "similar", matchedOpme: matched, verdict: "offender", label: "Prejuízo — substituir", color: "text-destructive", borderColor: "border-destructive/40", icon: "alert" };
+    const alt = findBestAlternative(matched.name);
+    return { match: exactMatch ? "exact" : "similar", matchedOpme: matched, suggestedReplacement: alt, verdict: "offender", label: "Prejuízo — substituir", color: "text-destructive", borderColor: "border-destructive/40", icon: "alert" };
   }
   if (matched.isOfensor) {
-    return { match: exactMatch ? "exact" : "similar", matchedOpme: matched, verdict: "offender", label: "Ofensor — considere trocar", color: "text-destructive", borderColor: "border-destructive/40", icon: "alert" };
+    const alt = findBestAlternative(matched.name);
+    return { match: exactMatch ? "exact" : "similar", matchedOpme: matched, suggestedReplacement: alt, verdict: "offender", label: "Ofensor — considere trocar", color: "text-destructive", borderColor: "border-destructive/40", icon: "alert" };
   }
   if (matched.isGlosado) {
-    return { match: exactMatch ? "exact" : "similar", matchedOpme: matched, verdict: "gloss-risk", label: "Risco de glosa", color: "text-warning", borderColor: "border-warning/40", icon: "warning" };
+    const alt = findBestAlternative(matched.name);
+    return { match: exactMatch ? "exact" : "similar", matchedOpme: matched, suggestedReplacement: alt, verdict: "gloss-risk", label: "Risco de glosa", color: "text-warning", borderColor: "border-warning/40", icon: "warning" };
   }
   if (matched.improvesRent) {
     return { match: exactMatch ? "exact" : "similar", matchedOpme: matched, verdict: "best", label: "Melhor opção", color: "text-success", borderColor: "border-success/40", icon: "check" };
   }
   
-  // Has a match, check if there's a better alternative
-  const betterAlt = mockRecommendedOPMEs.find(o => o.improvesRent && !o.isOfensor && !o.isGlosado && o.name !== matched.name);
+  const betterAlt = findBestAlternative(matched.name);
   if (betterAlt) {
-    return { match: exactMatch ? "exact" : "similar", matchedOpme: matched, verdict: "replaceable", label: "Pode ser substituído", color: "text-info", borderColor: "border-info/40", icon: "swap" };
+    return { match: exactMatch ? "exact" : "similar", matchedOpme: matched, suggestedReplacement: betterAlt, verdict: "replaceable", label: "Pode ser substituído", color: "text-info", borderColor: "border-info/40", icon: "swap" };
   }
 
   return { match: exactMatch ? "exact" : "similar", matchedOpme: matched, verdict: "neutral", label: "OK", color: "text-muted-foreground", borderColor: "border-border", icon: "neutral" };
@@ -96,6 +109,10 @@ const StepConference = () => {
 
   const updateItem = (id: string, field: string, value: string | number) => {
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, [field]: value } : i)));
+  };
+
+  const replaceItemWith = (id: string, opme: typeof mockRecommendedOPMEs[0]) => {
+    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, name: opme.name, supplier: opme.supplier } : i)));
   };
 
   const addItem = () => {
@@ -291,17 +308,33 @@ const StepConference = () => {
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
-                  {/* Status line */}
-                  <div className="flex items-center gap-2 ml-8 mt-1.5">
-                    {insight && insight.verdict !== "neutral" && (
-                      <span className={cn("text-[10px] font-medium flex items-center gap-1", insight.color)}>
-                        <InsightIcon insight={insight} />
-                        {insight.label}
-                        {insight.matchedOpme && <span className="text-muted-foreground ml-1">({insight.matchedOpme.impactDelta})</span>}
-                      </span>
-                    )}
-                    {isDuplicate && <span className="text-[10px] text-destructive">⚠ Item duplicado</span>}
-                  </div>
+                  {/* Status line with replacement suggestion */}
+                  {((insight && insight.verdict !== "neutral") || isDuplicate) && (
+                    <div className="ml-8 mt-1.5 space-y-1">
+                      {insight && insight.verdict !== "neutral" && (
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={cn("text-[10px] font-medium flex items-center gap-1", insight.color)}>
+                            <InsightIcon insight={insight} />
+                            {insight.label}
+                            {insight.matchedOpme && <span className="text-muted-foreground">({insight.matchedOpme.impactDelta})</span>}
+                          </span>
+                          {insight.suggestedReplacement && (
+                            <button
+                              onClick={() => replaceItemWith(item.id, insight.suggestedReplacement!)}
+                              className={cn(
+                                "text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1 transition-colors",
+                                "bg-success/10 text-success border border-success/30 hover:bg-success/20"
+                              )}
+                            >
+                              <ArrowLeftRight className="w-2.5 h-2.5" />
+                              Trocar por: {insight.suggestedReplacement.name} ({insight.suggestedReplacement.impactDelta})
+                            </button>
+                          )}
+                        </div>
+                      )}
+                      {isDuplicate && <span className="text-[10px] text-destructive">⚠ Item duplicado</span>}
+                    </div>
+                  )}
                 </div>
               );
             })}
