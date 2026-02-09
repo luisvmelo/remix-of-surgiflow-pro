@@ -122,7 +122,7 @@ const StepDocuments = () => {
       </div>
 
       <div className="flex justify-end">
-        <Button onClick={handleFinish} disabled={files.length === 0} className="h-11 px-6">
+        <Button onClick={handleFinish} className="h-11 px-6">
           Ver Resumo Final <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
       </div>

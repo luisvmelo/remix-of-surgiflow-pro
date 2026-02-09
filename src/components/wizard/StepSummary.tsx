@@ -1,6 +1,7 @@
+import { useMemo } from "react";
 import { useSurgical } from "@/contexts/SurgicalContext";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Download, Save, TrendingUp, AlertTriangle, Shield, User, Stethoscope, Building, FileText, Package, Send, BarChart3, ShieldCheck, ShieldAlert, ArrowLeftRight, CircleDot } from "lucide-react";
+import { CheckCircle2, Download, Save, TrendingUp, AlertTriangle, Shield, User, Stethoscope, Building, FileText, Package, Send, BarChart3, ShieldCheck, ShieldAlert, ArrowLeftRight, CircleDot, ClipboardCheck, Clock, FileWarning } from "lucide-react";
 import { mockLinkedProcedures, mockRecommendedOPMEs } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +29,28 @@ const StepSummary = () => {
   const glossColor = state.glossRisk < 15 ? "text-success" : state.glossRisk < 30 ? "text-warning" : "text-destructive";
   const attachedDocs = state.documents.filter((d) => d.attached);
   const missingRequired = state.documents.filter((d) => d.required && !d.attached);
+
+  // Build pending steps for surgery
+  const pendingSteps = useMemo(() => {
+    const hasOffenders = state.extractedItems.some(item => {
+      const v = getItemVerdict(item.name);
+      return v && (v.label === "Ofensor" || v.label === "Prejuízo");
+    });
+    const hasGlossRisk = state.extractedItems.some(item => {
+      const v = getItemVerdict(item.name);
+      return v && v.label === "Risco glosa";
+    });
+
+    const steps = [
+      { title: "Autorização da Operadora", description: "Aguardando aprovação da guia pela operadora", status: "pending" as const, icon: Clock },
+      { title: "Documentação Completa", description: `${missingRequired.length} documento(s) obrigatório(s) pendente(s)`, status: missingRequired.length > 0 ? "warning" as const : "done" as const, icon: missingRequired.length > 0 ? FileWarning : CheckCircle2 },
+      { title: "OPMEs Confirmados", description: hasOffenders ? "Existem itens ofensores não substituídos" : hasGlossRisk ? "Itens com risco de glosa identificados" : "Todos os itens conferidos", status: hasOffenders ? "warning" as const : hasGlossRisk ? "attention" as const : "done" as const, icon: hasOffenders ? ShieldAlert : hasGlossRisk ? AlertTriangle : ShieldCheck },
+      { title: "Agendamento Cirúrgico", description: "Centro cirúrgico e equipe a confirmar", status: "pending" as const, icon: Clock },
+      { title: "Cotação OPME (3 fornecedores)", description: "Cotações de pelo menos 3 fornecedores", status: "pending" as const, icon: Clock },
+      { title: "Exames Pré-Operatórios", description: "Validação de exames dentro da validade", status: "pending" as const, icon: Clock },
+    ];
+    return steps;
+  }, [state, missingRequired]);
 
   return (
     <div className="p-6 lg:p-8 space-y-5 max-w-[1200px] mx-auto">
@@ -193,6 +216,44 @@ const StepSummary = () => {
               })}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Pending steps for surgery */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <ClipboardCheck className="w-4 h-4 text-primary" />
+          <span className="text-sm font-semibold text-foreground">Pendências para Realização da Cirurgia</span>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          {pendingSteps.map((step, idx) => {
+            const Icon = step.icon;
+            return (
+              <div
+                key={idx}
+                className={cn(
+                  "glass-card rounded-xl p-4 flex items-start gap-3 transition-all",
+                  step.status === "warning" && "border-destructive/30 bg-destructive/5",
+                  step.status === "attention" && "border-warning/30 bg-warning/5",
+                  step.status === "done" && "border-success/30 bg-success/5",
+                )}
+              >
+                <div className={cn(
+                  "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
+                  step.status === "done" && "bg-success/15 text-success",
+                  step.status === "warning" && "bg-destructive/15 text-destructive",
+                  step.status === "attention" && "bg-warning/15 text-warning",
+                  step.status === "pending" && "bg-muted text-muted-foreground",
+                )}>
+                  <Icon className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold text-foreground">{step.title}</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">{step.description}</div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
