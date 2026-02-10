@@ -2,7 +2,12 @@ import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSurgical } from "@/contexts/SurgicalContext";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Download, Save, TrendingUp, AlertTriangle, Shield, User, Stethoscope, Building, FileText, Package, Send, BarChart3, ShieldCheck, ShieldAlert, ArrowLeftRight, CircleDot, ClipboardCheck, Clock, FileWarning } from "lucide-react";
+import {
+  CheckCircle2, Download, Save, TrendingUp, AlertTriangle, Shield,
+  User, Stethoscope, Building, FileText, Package, Send, BarChart3,
+  ShieldCheck, ShieldAlert, CircleDot, ClipboardList, FileWarning,
+  Lightbulb, ArrowRight, XCircle
+} from "lucide-react";
 import { mockLinkedProcedures, mockRecommendedOPMEs } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
 
@@ -31,233 +36,238 @@ const StepSummary = () => {
   const glossColor = state.glossRisk < 15 ? "text-success" : state.glossRisk < 30 ? "text-warning" : "text-destructive";
   const attachedDocs = state.documents.filter((d) => d.attached);
   const missingRequired = state.documents.filter((d) => d.required && !d.attached);
+  const missingOptional = state.documents.filter((d) => !d.required && !d.attached);
+  const conformidade = missingRequired.length === 0 ? 100 : Math.round(((state.documents.filter(d => d.required).length - missingRequired.length) / state.documents.filter(d => d.required).length) * 100);
 
-  // Build pending steps for surgery
-  const pendingSteps = useMemo(() => {
-    const hasOffenders = state.extractedItems.some(item => {
+  const linkedProcs = state.linkedProcedures.map(code => mockLinkedProcedures.find(p => p.code === code)).filter(Boolean);
+
+  // Build improvement suggestions
+  const suggestions = useMemo(() => {
+    const tips: { text: string; impact: string; type: "rent" | "glosa" | "docs" }[] = [];
+
+    // Check for offender items that could be swapped
+    const offenders = state.extractedItems.filter(item => {
       const v = getItemVerdict(item.name);
       return v && (v.label === "Ofensor" || v.label === "Prejuízo");
     });
-    const hasGlossRisk = state.extractedItems.some(item => {
+    if (offenders.length > 0) {
+      tips.push({ text: `Substitua ${offenders.length} item(ns) ofensor(es) por equivalentes técnicos`, impact: "+R$ 400~800", type: "rent" });
+    }
+
+    const glossItems = state.extractedItems.filter(item => {
       const v = getItemVerdict(item.name);
       return v && v.label === "Risco glosa";
     });
+    if (glossItems.length > 0) {
+      tips.push({ text: `${glossItems.length} item(ns) com risco de glosa — considere alternativas`, impact: "-5% glosa", type: "glosa" });
+    }
 
-    const steps = [
-      { title: "Autorização da Operadora", description: "Aguardando aprovação da guia pela operadora", status: "pending" as const, icon: Clock },
-      { title: "Documentação Completa", description: `${missingRequired.length} documento(s) obrigatório(s) pendente(s)`, status: missingRequired.length > 0 ? "warning" as const : "done" as const, icon: missingRequired.length > 0 ? FileWarning : CheckCircle2 },
-      { title: "OPMEs Confirmados", description: hasOffenders ? "Existem itens ofensores não substituídos" : hasGlossRisk ? "Itens com risco de glosa identificados" : "Todos os itens conferidos", status: hasOffenders ? "warning" as const : hasGlossRisk ? "attention" as const : "done" as const, icon: hasOffenders ? ShieldAlert : hasGlossRisk ? AlertTriangle : ShieldCheck },
-      { title: "Agendamento Cirúrgico", description: "Centro cirúrgico e equipe a confirmar", status: "pending" as const, icon: Clock },
-      { title: "Cotação OPME (3 fornecedores)", description: "Cotações de pelo menos 3 fornecedores", status: "pending" as const, icon: Clock },
-      { title: "Exames Pré-Operatórios", description: "Validação de exames dentro da validade", status: "pending" as const, icon: Clock },
-    ];
-    return steps;
-  }, [state, missingRequired]);
+    if (missingRequired.length > 0) {
+      tips.push({ text: `Anexe ${missingRequired.length} documento(s) obrigatório(s) para aumentar conformidade`, impact: "+conformidade", type: "docs" });
+    }
+
+    // Check if there are high-rent procedures not added
+    const unusedHighRent = mockLinkedProcedures.filter(p => p.improvesRent && !p.isOfensor && !state.linkedProcedures.includes(p.code));
+    if (unusedHighRent.length > 0) {
+      const totalPossible = unusedHighRent.reduce((a, p) => a + (parseInt(p.rentabilityDelta.replace(/[^\d-]/g, "")) || 0), 0);
+      if (totalPossible > 0) {
+        tips.push({ text: `Adicione ${unusedHighRent.length} procedimento(s) secundário(s) disponíveis`, impact: `+R$ ${totalPossible}`, type: "rent" });
+      }
+    }
+
+    return tips;
+  }, [state]);
 
   return (
-    <div className="p-6 lg:p-8 space-y-5 max-w-[1200px] mx-auto">
+    <div className="h-full overflow-y-auto p-6 lg:p-8 space-y-5 max-w-[1200px] mx-auto">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground mb-1">Resumo da Solicitação</h2>
-          <p className="text-muted-foreground text-sm">Revise todos os dados antes de enviar</p>
+        <div className="flex items-center gap-3">
+          <ClipboardList className="w-6 h-6 text-primary" />
+          <div>
+            <h2 className="text-xl font-bold text-foreground">Guia de Solicitação Cirúrgica</h2>
+            <p className="text-muted-foreground text-xs">Revisão final — {new Date().toLocaleDateString("pt-BR")}</p>
+          </div>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => { saveRequest("draft"); navigate("/home"); }}>
             <Save className="w-4 h-4 mr-1" /> Rascunho
           </Button>
-          <Button variant="outline" size="sm">
-            <Download className="w-4 h-4 mr-1" /> Pacote
-          </Button>
           <Button size="sm" onClick={() => { saveRequest("awaiting-auth"); resetWizard(); navigate("/home"); }}>
-            <Send className="w-4 h-4 mr-1" /> Finalizar
+            <Send className="w-4 h-4 mr-1" /> Finalizar e Enviar
           </Button>
         </div>
       </div>
 
-      {/* Alert */}
-      {missingRequired.length > 0 && (
-        <div className="rounded-xl border-2 border-warning/40 bg-warning/10 p-3 flex items-center gap-3">
-          <AlertTriangle className="w-5 h-5 text-warning shrink-0" />
-          <div>
-            <p className="font-semibold text-foreground text-sm">Documentos obrigatórios pendentes</p>
-            <p className="text-xs text-muted-foreground">{missingRequired.map(d => d.name).join(", ")}</p>
+      {/* Big numbers */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="glass-card rounded-xl p-4 text-center">
+          <TrendingUp className={`w-5 h-5 mx-auto mb-1 ${rentColor}`} />
+          <div className={`text-3xl font-extrabold tracking-tight ${rentColor}`}>+{state.rentabilityScore}%</div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">Rentabilidade Estimada</div>
+        </div>
+        <div className="glass-card rounded-xl p-4 text-center">
+          <AlertTriangle className={`w-5 h-5 mx-auto mb-1 ${glossColor}`} />
+          <div className={`text-3xl font-extrabold tracking-tight ${glossColor}`}>{state.glossRisk}%</div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">Risco de Glosa</div>
+        </div>
+        <div className="glass-card rounded-xl p-4 text-center">
+          <Shield className={`w-5 h-5 mx-auto mb-1 ${conformidade === 100 ? "text-success" : "text-warning"}`} />
+          <div className={`text-3xl font-extrabold tracking-tight ${conformidade === 100 ? "text-success" : "text-warning"}`}>{conformidade}%</div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">Conformidade</div>
+        </div>
+      </div>
+
+      {/* Guide content */}
+      <div className="glass-card rounded-xl overflow-hidden">
+        {/* Patient / Doctor / Operadora header */}
+        <div className="bg-muted/30 border-b px-5 py-3">
+          <div className="grid grid-cols-3 gap-4 text-xs">
+            <div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1 mb-1">
+                <User className="w-3 h-3" /> Paciente
+              </div>
+              <div className="font-semibold text-foreground">{state.patient?.name || "—"}</div>
+              <div className="text-muted-foreground mt-0.5">CPF: {state.patient?.cpf || "—"}</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1 mb-1">
+                <Stethoscope className="w-3 h-3" /> Médico
+              </div>
+              <div className="font-semibold text-foreground">{state.doctor?.name || "—"}</div>
+              <div className="text-muted-foreground mt-0.5">{state.doctor?.specialty} · {state.doctor?.crm}</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1 mb-1">
+                <Building className="w-3 h-3" /> Operadora
+              </div>
+              <div className="font-semibold text-foreground">{state.operadora?.name || "—"}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Procedures */}
+        <div className="px-5 py-4 border-b">
+          <div className="flex items-center gap-2 mb-3">
+            <FileText className="w-4 h-4 text-primary" />
+            <span className="text-xs font-bold text-foreground uppercase tracking-wider">
+              Procedimentos ({1 + linkedProcs.length})
+            </span>
+          </div>
+          {/* Principal */}
+          <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-primary/5 border border-primary/20 mb-1.5">
+            <div className="flex items-center gap-2 text-xs">
+              <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+              <span className="font-semibold text-foreground">{state.selectedProcedure?.name || "—"}</span>
+              <span className="text-muted-foreground font-mono">{state.selectedProcedure?.code}</span>
+            </div>
+            <span className="text-[10px] font-semibold text-primary px-2 py-0.5 rounded-full bg-primary/10">Principal</span>
+          </div>
+          {/* Secondary */}
+          {linkedProcs.map((proc) => proc && (
+            <div key={proc.code} className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/30 mb-1 text-xs">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-3 h-3 text-success shrink-0" />
+                <span className="text-foreground">{proc.name}</span>
+                <span className="text-muted-foreground font-mono">{proc.code}</span>
+              </div>
+              <span className={cn("font-bold tabular-nums", proc.rentabilityDelta.startsWith("+") ? "text-success" : "text-destructive")}>
+                {proc.rentabilityDelta}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Items OPME */}
+        <div className="px-5 py-4 border-b">
+          <div className="flex items-center gap-2 mb-3">
+            <Package className="w-4 h-4 text-primary" />
+            <span className="text-xs font-bold text-foreground uppercase tracking-wider">
+              Itens OPME ({state.extractedItems.length})
+            </span>
+          </div>
+          <div className="space-y-1">
+            {state.extractedItems.map((item) => {
+              const verdict = getItemVerdict(item.name);
+              const Icon = verdict?.icon;
+              return (
+                <div key={item.id} className={cn("flex items-center justify-between py-2 px-3 rounded-lg text-xs", verdict?.bg || "bg-muted/30")}>
+                  <div className="flex items-center gap-2 min-w-0">
+                    {Icon && <Icon className={cn("w-3.5 h-3.5 shrink-0", verdict?.color)} />}
+                    <span className="font-medium text-foreground truncate">{item.name}</span>
+                    {item.supplier && <span className="text-muted-foreground shrink-0">· {item.supplier}</span>}
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0 ml-2">
+                    {verdict && verdict.label !== "OK" && (
+                      <span className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded-full border",
+                        verdict.label === "Melhor opção" && "badge-success",
+                        (verdict.label === "Ofensor" || verdict.label === "Prejuízo") && "badge-danger",
+                        verdict.label === "Risco glosa" && "badge-warning",
+                      )}>{verdict.label}</span>
+                    )}
+                    <span className="text-muted-foreground tabular-nums">×{item.quantity}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Documents */}
+        <div className="px-5 py-4">
+          <div className="flex items-center gap-2 mb-3">
+            <FileText className="w-4 h-4 text-primary" />
+            <span className="text-xs font-bold text-foreground uppercase tracking-wider">
+              Documentos
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-1.5">
+            {attachedDocs.map((doc, idx) => (
+              <div key={idx} className="flex items-center gap-2 py-1.5 px-3 rounded-lg bg-success/5 text-xs">
+                <CheckCircle2 className="w-3 h-3 text-success shrink-0" />
+                <span className="text-foreground">{doc.name}</span>
+              </div>
+            ))}
+            {missingRequired.map((doc, idx) => (
+              <div key={`mr-${idx}`} className="flex items-center gap-2 py-1.5 px-3 rounded-lg bg-destructive/5 text-xs">
+                <XCircle className="w-3 h-3 text-destructive shrink-0" />
+                <span className="text-foreground">{doc.name}</span>
+                <span className="text-[9px] text-destructive font-semibold ml-auto">Obrigatório</span>
+              </div>
+            ))}
+            {missingOptional.map((doc, idx) => (
+              <div key={`mo-${idx}`} className="flex items-center gap-2 py-1.5 px-3 rounded-lg bg-muted/30 text-xs">
+                <FileWarning className="w-3 h-3 text-muted-foreground shrink-0" />
+                <span className="text-muted-foreground">{doc.name}</span>
+                <span className="text-[9px] text-muted-foreground ml-auto">Opcional</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Improvement suggestions */}
+      {suggestions.length > 0 && (
+        <div className="glass-card rounded-xl p-4 border-accent/20">
+          <div className="flex items-center gap-2 mb-3">
+            <Lightbulb className="w-4 h-4 text-accent" />
+            <span className="text-xs font-bold text-foreground uppercase tracking-wider">Sugestões de Melhoria</span>
+          </div>
+          <div className="space-y-2">
+            {suggestions.map((tip, idx) => (
+              <div key={idx} className="flex items-center gap-3 py-2 px-3 rounded-lg bg-muted/30 text-xs">
+                <ArrowRight className={cn("w-3.5 h-3.5 shrink-0",
+                  tip.type === "rent" ? "text-success" : tip.type === "glosa" ? "text-warning" : "text-primary"
+                )} />
+                <span className="text-foreground flex-1">{tip.text}</span>
+                <span className={cn("font-bold tabular-nums shrink-0",
+                  tip.type === "rent" ? "text-success" : tip.type === "glosa" ? "text-warning" : "text-primary"
+                )}>{tip.impact}</span>
+              </div>
+            ))}
           </div>
         </div>
       )}
-
-      {/* Top row: scores + info */}
-      <div className="grid grid-cols-12 gap-4">
-        {/* Score cards - compact row */}
-        <div className="col-span-12 grid grid-cols-4 gap-3">
-          <div className="glass-card rounded-xl p-4 text-center">
-            <TrendingUp className={`w-5 h-5 mx-auto mb-1 ${rentColor}`} />
-            <div className={`text-2xl font-bold tracking-tight ${rentColor}`}>+{state.rentabilityScore}%</div>
-            <div className="text-[10px] text-muted-foreground mt-0.5">Rentabilidade</div>
-          </div>
-          <div className="glass-card rounded-xl p-4 text-center">
-            <AlertTriangle className={`w-5 h-5 mx-auto mb-1 ${glossColor}`} />
-            <div className={`text-2xl font-bold tracking-tight ${glossColor}`}>{state.glossRisk}%</div>
-            <div className="text-[10px] text-muted-foreground mt-0.5">Risco de Glosa</div>
-          </div>
-          <div className="glass-card rounded-xl p-4 text-center">
-            <BarChart3 className="w-5 h-5 mx-auto mb-1 text-primary" />
-            <div className="text-2xl font-bold tracking-tight text-primary">P{state.historicalPercentile || 72}</div>
-            <div className="text-[10px] text-muted-foreground mt-0.5">Percentil Histórico</div>
-          </div>
-          <div className="glass-card rounded-xl p-4 text-center">
-            <Shield className="w-5 h-5 mx-auto mb-1 text-info" />
-            <div className="text-2xl font-bold tracking-tight text-info">92%</div>
-            <div className="text-[10px] text-muted-foreground mt-0.5">Conformidade</div>
-          </div>
-        </div>
-
-        {/* Left column: info + procedures */}
-        <div className="col-span-5 space-y-3">
-          {/* Info grid 2x2 */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="glass-card rounded-xl p-4">
-              <div className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1 mb-2">
-                <Stethoscope className="w-3 h-3" /> Médico
-              </div>
-              <div className="text-sm font-medium text-foreground">{state.doctor?.name || "—"}</div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">{state.doctor?.specialty} · {state.doctor?.crm}</div>
-            </div>
-            <div className="glass-card rounded-xl p-4">
-              <div className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1 mb-2">
-                <User className="w-3 h-3" /> Paciente
-              </div>
-              <div className="text-sm font-medium text-foreground">{state.patient?.name || "—"}</div>
-              <div className="text-[10px] text-muted-foreground mt-1 space-y-0.5">
-                <div>CPF: {state.patient?.cpf || "—"}</div>
-                <div>Nascimento: {state.patient?.birthDate ? new Date(state.patient.birthDate + "T12:00:00").toLocaleDateString("pt-BR") : "—"}</div>
-                <div>Tel: {state.patient?.phone || "—"}</div>
-                <div>Mãe: {state.patient?.motherName || "—"}</div>
-              </div>
-            </div>
-            <div className="glass-card rounded-xl p-4">
-              <div className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1 mb-2">
-                <Building className="w-3 h-3" /> Operadora
-              </div>
-              <div className="text-sm font-medium text-foreground">{state.operadora?.name || "—"}</div>
-            </div>
-            <div className="glass-card rounded-xl p-4 col-span-2">
-              <div className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1 mb-2">
-                <FileText className="w-3 h-3" /> Procedimentos
-              </div>
-              <div className="text-sm font-medium text-foreground">{state.selectedProcedure?.name || "—"}</div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">{state.selectedProcedure?.code} · Principal</div>
-              {state.linkedProcedures.length > 0 && (
-                <div className="mt-2 pt-2 border-t border-border/50 space-y-1">
-                  {state.linkedProcedures.map((code) => {
-                    const proc = mockLinkedProcedures.find((p) => p.code === code);
-                    return proc ? (
-                      <div key={code} className="flex items-center justify-between py-1 text-xs">
-                        <div className="flex items-center gap-1.5">
-                          <CheckCircle2 className="w-3 h-3 text-success" />
-                          <span className="text-foreground">{proc.name}</span>
-                          <span className="text-muted-foreground">· {proc.code}</span>
-                        </div>
-                        <span className={cn("font-semibold", proc.rentabilityDelta.startsWith("+") ? "text-success" : "text-destructive")}>{proc.rentabilityDelta}</span>
-                      </div>
-                    ) : null;
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Documents */}
-          <div className="glass-card rounded-xl p-4">
-            <div className="text-xs font-semibold text-foreground mb-2">Documentos ({attachedDocs.length} anexados)</div>
-            {attachedDocs.length > 0 ? (
-              <div className="space-y-1">
-                {attachedDocs.map((doc, idx) => (
-                  <div key={idx} className="flex items-center gap-1.5 py-1 text-xs">
-                    <CheckCircle2 className="w-3 h-3 text-success" />
-                    <span className="text-foreground">{doc.name}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-xs text-muted-foreground">Nenhum documento anexado</p>
-            )}
-          </div>
-        </div>
-
-        {/* Right column: Items */}
-        <div className="col-span-7">
-          <div className="glass-card rounded-xl p-4 h-full">
-            <div className="flex items-center gap-2 mb-3">
-              <Package className="w-4 h-4 text-primary" />
-              <span className="text-xs font-semibold text-foreground">Itens / OPMEs ({state.extractedItems.length})</span>
-            </div>
-            <div className="space-y-1 max-h-[450px] overflow-y-auto pr-1">
-              {state.extractedItems.map((item) => {
-                const verdict = getItemVerdict(item.name);
-                const Icon = verdict?.icon;
-                return (
-                  <div key={item.id} className={cn("flex items-center justify-between py-2 px-3 rounded-lg text-xs", verdict?.bg || "bg-muted/50")}>
-                    <div className="flex items-center gap-2 min-w-0">
-                      {Icon && <Icon className={cn("w-3.5 h-3.5 shrink-0", verdict?.color)} />}
-                      <span className="font-medium text-foreground truncate">{item.name}</span>
-                      {item.supplier && <span className="text-muted-foreground shrink-0">· {item.supplier}</span>}
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0 ml-2">
-                      {verdict && verdict.label !== "OK" && (
-                        <span className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded-full border", 
-                          verdict.label === "Melhor opção" && "badge-success",
-                          verdict.label === "Ofensor" && "badge-danger",
-                          verdict.label === "Prejuízo" && "badge-danger",
-                          verdict.label === "Risco glosa" && "badge-warning",
-                        )}>{verdict.label}</span>
-                      )}
-                      <span className="text-muted-foreground">Qtd: {item.quantity}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Pending steps for surgery */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <ClipboardCheck className="w-4 h-4 text-primary" />
-          <span className="text-sm font-semibold text-foreground">Pendências para Realização da Cirurgia</span>
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          {pendingSteps.map((step, idx) => {
-            const Icon = step.icon;
-            return (
-              <div
-                key={idx}
-                className={cn(
-                  "glass-card rounded-xl p-4 flex items-start gap-3 transition-all",
-                  step.status === "warning" && "border-destructive/30 bg-destructive/5",
-                  step.status === "attention" && "border-warning/30 bg-warning/5",
-                  step.status === "done" && "border-success/30 bg-success/5",
-                )}
-              >
-                <div className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-                  step.status === "done" && "bg-success/15 text-success",
-                  step.status === "warning" && "bg-destructive/15 text-destructive",
-                  step.status === "attention" && "bg-warning/15 text-warning",
-                  step.status === "pending" && "bg-muted text-muted-foreground",
-                )}>
-                  <Icon className="w-4 h-4" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-semibold text-foreground">{step.title}</div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">{step.description}</div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
     </div>
   );
 };
