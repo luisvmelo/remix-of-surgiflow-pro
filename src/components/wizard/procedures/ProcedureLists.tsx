@@ -8,6 +8,7 @@ interface Props {
   selectedCodes: string[];
   onToggle: (code: string) => void;
   operadoraName: string;
+  search?: string;
 }
 
 const ProcedureCard = ({
