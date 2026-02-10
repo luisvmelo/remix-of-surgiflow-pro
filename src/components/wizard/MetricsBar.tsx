@@ -89,7 +89,6 @@ const MetricsBar = () => {
         </div>
       </div>
     </div>
-    </div>
   );
 };
 
