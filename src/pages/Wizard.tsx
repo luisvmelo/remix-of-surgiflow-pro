@@ -42,18 +42,11 @@ const Wizard = () => {
 
       <div className="flex flex-1 overflow-hidden">
         <WizardSidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {state.currentStep >= 2 && (
-            <div className="flex justify-center py-4 px-6 shrink-0">
-              <MetricsBar />
-            </div>
-          )}
-          <main className="flex-1 overflow-hidden">
-            <div className="animate-fade-in h-full">
-              {showSummary ? <StepSummary /> : StepComponent && <StepComponent />}
-            </div>
-          </main>
-        </div>
+        <main className="flex-1 overflow-hidden">
+          <div className="animate-fade-in h-full">
+            {showSummary ? <StepSummary /> : StepComponent && <StepComponent />}
+          </div>
+        </main>
       </div>
     </div>
   );
