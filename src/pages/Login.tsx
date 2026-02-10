@@ -4,18 +4,26 @@ import { useSurgical } from "@/contexts/SurgicalContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, Mail, Activity } from "lucide-react";
+import { Lock, Mail, Activity, Stethoscope, ClipboardList } from "lucide-react";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { setLoggedIn } = useSurgical();
+  const { setLoggedIn, updateState } = useSurgical();
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent, role: "secretary" | "doctor") => {
     e.preventDefault();
     setLoggedIn(true);
-    navigate("/home");
+    if (role === "doctor") {
+      // Set a mock doctor directly
+      updateState({
+        doctor: { id: "1", name: "Dr. Ricardo Almeida", specialty: "Ortopedia", crm: "CRM/SP 12345", active: true },
+      });
+      navigate("/medico");
+    } else {
+      navigate("/home");
+    }
   };
 
   return (
@@ -69,9 +77,9 @@ const Login = () => {
             <Activity className="w-8 h-8 text-primary" />
             <h1 className="text-2xl font-bold text-foreground">SolicitaCirurg</h1>
           </div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">Bem-vinda de volta</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Bem-vindo(a)</h2>
           <p className="text-muted-foreground mb-8">Acesse sua conta para gerenciar solicitações</p>
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={(e) => e.preventDefault()} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email">E-mail</Label>
               <div className="relative">
@@ -79,7 +87,7 @@ const Login = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="secretaria@clinica.com"
+                  placeholder="usuario@clinica.com"
                   className="pl-10"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -100,9 +108,27 @@ const Login = () => {
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full h-12 text-base font-semibold">
-              Entrar
-            </Button>
+
+            <div className="space-y-3 pt-2">
+              <p className="text-xs text-muted-foreground text-center">Entrar como:</p>
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  type="button"
+                  onClick={(e) => handleLogin(e, "secretary")}
+                  className="h-12 text-sm font-semibold"
+                >
+                  <ClipboardList className="w-4 h-4 mr-2" /> Secretária
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={(e) => handleLogin(e, "doctor")}
+                  className="h-12 text-sm font-semibold border-primary/30 hover:bg-primary/5"
+                >
+                  <Stethoscope className="w-4 h-4 mr-2" /> Médico
+                </Button>
+              </div>
+            </div>
           </form>
         </div>
       </div>
