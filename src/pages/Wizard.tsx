@@ -38,14 +38,16 @@ const Wizard = () => {
             </span>
           )}
         </div>
-        {/* metrics bar moved below */}
       </header>
-
-      {state.currentStep >= 2 && <MetricsBar />}
 
       <div className="flex flex-1 overflow-hidden">
         <WizardSidebar />
         <main className="flex-1 overflow-y-auto">
+          {state.currentStep >= 2 && (
+            <div className="flex justify-center py-4 px-6">
+              <MetricsBar />
+            </div>
+          )}
           <div className="animate-fade-in">
             {showSummary ? <StepSummary /> : StepComponent && <StepComponent />}
           </div>
