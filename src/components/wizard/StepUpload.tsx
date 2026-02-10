@@ -52,8 +52,8 @@ const StepUpload = () => {
   };
   const isLoading = phase === "reading" || phase === "extracting";
   return <div className="max-w-3xl mx-auto p-6 lg:p-8">
-      <h2 className="text-2xl font-bold text-foreground mb-1">Procedimentos Atrelados e Guia</h2>
-      <p className="text-muted-foreground mb-8">Adicione procedimentos complementares e faça upload da guia médica</p>
+      <h2 className="text-2xl font-bold text-foreground mb-1">Procedimentos Secundários</h2>
+      <p className="text-muted-foreground mb-8">Selecione procedimentos complementares para esta cirurgia</p>
 
       {/* Linked procedures */}
       {selectedProc && <div className="glass-card rounded-xl p-5 mb-6 animate-fade-in">

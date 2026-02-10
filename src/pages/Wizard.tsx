@@ -41,6 +41,8 @@ const Wizard = () => {
         {/* metrics bar moved below */}
       </header>
 
+      {state.currentStep >= 2 && <MetricsBar />}
+
       <div className="flex flex-1 overflow-hidden">
         <WizardSidebar />
         <main className="flex-1 overflow-y-auto">

@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 const steps: { label: string; icon: React.ElementType; step: WizardStep }[] = [
   { label: "Paciente e Cirurgia", icon: User, step: 1 },
-  { label: "Guia e Atrelados", icon: Upload, step: 2 },
+  { label: "Proc. Secundários", icon: Upload, step: 2 },
   { label: "Conferência", icon: FileCheck, step: 3 },
   { label: "Documentos", icon: FileText, step: 4 },
 ];
