@@ -27,7 +27,7 @@ const ItemCart = ({ selectedItems, onRemove, onQuantity, onNext }: Props) => {
   }, 0);
 
   return (
-    <div className="w-[340px] shrink-0 border-l bg-card flex flex-col h-full">
+    <div className="w-[420px] shrink-0 border-l bg-card flex flex-col h-full">
       {/* Header */}
       <div className="px-4 pt-4 pb-3 border-b bg-muted/30">
         <div className="flex items-center gap-2 mb-2">
