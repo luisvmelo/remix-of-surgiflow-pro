@@ -3,6 +3,7 @@ import { useSurgical } from "@/contexts/SurgicalContext";
 import { mockExtractedItems, mockLinkedProcedures } from "@/lib/mockData";
 import { SuggestedProcedures, HistoricalProcedures } from "./procedures/ProcedureLists";
 import ProcedureSearch from "./procedures/ProcedureSearch";
+import SmartSelection from "./procedures/SmartSelection";
 import GuiaCart from "./procedures/GuiaCart";
 import MetricsBar from "./MetricsBar";
 
