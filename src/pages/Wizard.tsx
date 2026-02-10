@@ -1,6 +1,6 @@
 import { useSurgical } from "@/contexts/SurgicalContext";
 import WizardSidebar from "@/components/wizard/WizardSidebar";
-import RentabilityIndicator from "@/components/wizard/RentabilityIndicator";
+import MetricsBar from "@/components/wizard/MetricsBar";
 import StepPatient from "@/components/wizard/StepPatient";
 import StepUpload from "@/components/wizard/StepUpload";
 import StepConference from "@/components/wizard/StepConference";
@@ -38,8 +38,10 @@ const Wizard = () => {
             </span>
           )}
         </div>
-        {state.currentStep >= 3 && <RentabilityIndicator />}
+        {/* metrics bar moved below */}
       </header>
+
+      {state.currentStep >= 2 && <MetricsBar />}
 
       <div className="flex flex-1 overflow-hidden">
         <WizardSidebar />
