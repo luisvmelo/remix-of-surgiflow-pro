@@ -31,6 +31,10 @@ const StepItems = () => {
     );
   };
 
+  const applyAllItems = (newItems: SelectedItem[]) => {
+    setSelectedItems((prev) => [...prev, ...newItems.filter((n) => !prev.some((p) => p.name === n.name))]);
+  };
+
   // Update metrics when items change
   useEffect(() => {
     const prevRent = state.rentabilityScore;
