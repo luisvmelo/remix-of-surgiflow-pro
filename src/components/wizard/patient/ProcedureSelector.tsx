@@ -61,7 +61,6 @@ const ProcedureSelector = ({
         </div>}
       {procSearch.length >= 2 && searchResults.length === 0 && <p className="text-xs text-muted-foreground mt-2 text-center py-2">Nenhum procedimento encontrado</p>}
 
-      {selectedProc}
     </div>;
 };
 export default ProcedureSelector;
