@@ -125,10 +125,10 @@ export const SuggestedProcedures = ({ selectedCodes, onToggle, operadoraName, se
   );
 };
 
-export const HistoricalProcedures = ({ selectedCodes, onToggle, operadoraName }: Props) => {
+export const HistoricalProcedures = ({ selectedCodes, onToggle, operadoraName, search = "" }: Props) => {
   const historical = mockLinkedProcedures.filter(
     (p) => !p.doctorUses && !p.improvesRent
-  );
+  ).filter((p) => !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.code.includes(search));
 
   if (historical.length === 0) return null;
 
