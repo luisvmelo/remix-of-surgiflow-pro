@@ -4,6 +4,7 @@ import { mockRecommendedOPMEs } from "@/lib/mockData";
 import { SuggestedItems, HistoricalItems, EquivalenceItems } from "./items/ItemLists";
 import ItemSearch from "./items/ItemSearch";
 import ItemCart from "./items/ItemCart";
+import ItemSmartSelection from "./items/ItemSmartSelection";
 import MetricsBar from "./MetricsBar";
 
 interface SelectedItem {
@@ -28,6 +29,10 @@ const StepItems = () => {
     setSelectedItems((prev) =>
       prev.map((s) => (s.name === name ? { ...s, quantity: qty } : s))
     );
+  };
+
+  const applyAllItems = (newItems: SelectedItem[]) => {
+    setSelectedItems((prev) => [...prev, ...newItems.filter((n) => !prev.some((p) => p.name === n.name))]);
   };
 
   // Update metrics when items change
@@ -77,6 +82,8 @@ const StepItems = () => {
           </div>
           <MetricsBar />
         </div>
+
+        <ItemSmartSelection selectedItems={selectedItems} onApplyAll={applyAllItems} />
 
         <ItemSearch selectedItems={selectedItems} onToggle={toggleItem} />
 
