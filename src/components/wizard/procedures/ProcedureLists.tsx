@@ -139,7 +139,7 @@ export const HistoricalProcedures = ({ selectedCodes, onToggle, operadoraName }:
       <p className="text-xs text-muted-foreground mb-4">
         Procedimentos usados anteriormente em cirurgias similares
       </p>
-      <div className="space-y-2">
+      <div className="grid grid-cols-2 gap-2">
         {historical.map((proc) => (
           <ProcedureCard
             key={proc.code}
