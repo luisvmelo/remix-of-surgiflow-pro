@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { mockRecommendedOPMEs } from "@/lib/mockData";
 import { Plus, Check, Minus, TrendingUp, TrendingDown, AlertTriangle, Sparkles, History, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,7 +10,7 @@ interface SelectedItem {
 
 interface Props {
   selectedItems: SelectedItem[];
-  onToggle: (name: string) => void;
+  onToggle: (name: string, quantity?: number) => void;
   onQuantity: (name: string, qty: number) => void;
   operadoraName: string;
   search?: string;
@@ -18,18 +19,17 @@ interface Props {
 const ItemCard = ({
   item,
   isSelected,
-  quantity,
   onToggle,
-  onQuantity,
 }: {
   item: typeof mockRecommendedOPMEs[0];
   isSelected: boolean;
-  quantity: number;
-  onToggle: () => void;
-  onQuantity: (qty: number) => void;
+  onToggle: (qty: number) => void;
 }) => {
-  const isPositive = item.impactDelta.startsWith("+") && item.impactDelta !== "+R$ 0";
-  const isNegative = item.impactDelta.startsWith("-");
+  const [previewQty, setPreviewQty] = useState(1);
+  const baseImpact = parseInt(item.impactDelta.replace(/[^\d-]/g, "")) || 0;
+  const isPositive = baseImpact > 0;
+  const isNegative = baseImpact < 0;
+  const liveImpact = baseImpact * previewQty;
 
   return (
     <div className={cn(
@@ -42,27 +42,6 @@ const ItemCard = ({
         <div className="flex-1 min-w-0">
           <div className="font-semibold text-foreground text-xs leading-tight">{item.name}</div>
           <div className="text-[10px] text-muted-foreground">{item.supplier}</div>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="text-right">
-            <span className={cn(
-              "text-xs font-bold tabular-nums block",
-              isPositive ? "text-success" : isNegative ? "text-destructive" : "text-muted-foreground"
-            )}>
-              {item.impactDelta}
-            </span>
-          </div>
-          <button
-            onClick={onToggle}
-            className={cn(
-              "w-6 h-6 rounded-full flex items-center justify-center transition-all",
-              isSelected
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground group-hover:bg-primary/10"
-            )}
-          >
-            {isSelected ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
-          </button>
         </div>
       </div>
 
@@ -86,25 +65,47 @@ const ItemCard = ({
         )}
       </div>
 
-      {/* Quantity selector — only when selected */}
-      {isSelected && (
-        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/50 animate-fade-in">
+      {/* Quantity + live impact + add button — always visible */}
+      <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
+        <div className="flex items-center gap-1.5">
           <span className="text-[10px] text-muted-foreground">Qtd:</span>
           <button
-            onClick={(e) => { e.stopPropagation(); onQuantity(Math.max(1, quantity - 1)); }}
+            onClick={(e) => { e.stopPropagation(); setPreviewQty(Math.max(1, previewQty - 1)); }}
             className="w-5 h-5 rounded bg-muted flex items-center justify-center hover:bg-muted-foreground/20"
+            disabled={isSelected}
           >
             <Minus className="w-2.5 h-2.5" />
           </button>
-          <span className="text-xs font-bold tabular-nums w-4 text-center">{quantity}</span>
+          <span className="text-xs font-bold tabular-nums w-4 text-center">{previewQty}</span>
           <button
-            onClick={(e) => { e.stopPropagation(); onQuantity(quantity + 1); }}
+            onClick={(e) => { e.stopPropagation(); setPreviewQty(previewQty + 1); }}
             className="w-5 h-5 rounded bg-muted flex items-center justify-center hover:bg-muted-foreground/20"
+            disabled={isSelected}
           >
             <Plus className="w-2.5 h-2.5" />
           </button>
         </div>
-      )}
+
+        <div className="flex items-center gap-2">
+          <span className={cn(
+            "text-xs font-bold tabular-nums",
+            liveImpact > 0 ? "text-success" : liveImpact < 0 ? "text-destructive" : "text-muted-foreground"
+          )}>
+            {liveImpact >= 0 ? "+" : ""}R$ {Math.abs(liveImpact)}
+          </span>
+          <button
+            onClick={() => onToggle(previewQty)}
+            className={cn(
+              "w-6 h-6 rounded-full flex items-center justify-center transition-all",
+              isSelected
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground group-hover:bg-primary/10"
+            )}
+          >
+            {isSelected ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
@@ -125,15 +126,13 @@ export const SuggestedItems = ({ selectedItems, onToggle, onQuantity, operadoraN
       </p>
       <div className="grid grid-cols-2 gap-2">
         {suggested.map((item) => {
-          const sel = selectedItems.find((s) => s.name === item.name);
+          const isSelected = selectedItems.some((s) => s.name === item.name);
           return (
             <ItemCard
               key={item.name}
               item={item}
-              isSelected={!!sel}
-              quantity={sel?.quantity || 1}
-              onToggle={() => onToggle(item.name)}
-              onQuantity={(qty) => onQuantity(item.name, qty)}
+              isSelected={isSelected}
+              onToggle={(qty) => onToggle(item.name, qty)}
             />
           );
         })}
@@ -160,15 +159,13 @@ export const HistoricalItems = ({ selectedItems, onToggle, onQuantity, operadora
       </p>
       <div className="grid grid-cols-2 gap-2">
         {historical.map((item) => {
-          const sel = selectedItems.find((s) => s.name === item.name);
+          const isSelected = selectedItems.some((s) => s.name === item.name);
           return (
             <ItemCard
               key={item.name}
               item={item}
-              isSelected={!!sel}
-              quantity={sel?.quantity || 1}
-              onToggle={() => onToggle(item.name)}
-              onQuantity={(qty) => onQuantity(item.name, qty)}
+              isSelected={isSelected}
+              onToggle={(qty) => onToggle(item.name, qty)}
             />
           );
         })}
@@ -197,6 +194,10 @@ export const EquivalenceItems = ({ selectedItems, onToggle, onQuantity }: Omit<P
       <div className="space-y-2">
         {mockEquivalences.map((eq) => {
           const sel = selectedItems.find((s) => s.name === eq.equivalent);
+          const [previewQty, setPreviewQty] = useState(1);
+          const baseImpact = parseInt(eq.impactDelta.replace(/[^\d-]/g, "")) || 0;
+          const liveImpact = baseImpact * previewQty;
+
           return (
             <div
               key={eq.equivalent}
@@ -212,10 +213,35 @@ export const EquivalenceItems = ({ selectedItems, onToggle, onQuantity }: Omit<P
                   <div className="text-[10px] text-muted-foreground">{eq.supplier}</div>
                   <div className="text-[10px] text-accent-foreground mt-1 italic">{eq.reason}</div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-xs font-bold text-success tabular-nums">{eq.impactDelta}</span>
+              </div>
+              <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-muted-foreground">Qtd:</span>
                   <button
-                    onClick={() => onToggle(eq.equivalent)}
+                    onClick={() => setPreviewQty(Math.max(1, previewQty - 1))}
+                    className="w-5 h-5 rounded bg-muted flex items-center justify-center hover:bg-muted-foreground/20"
+                    disabled={!!sel}
+                  >
+                    <Minus className="w-2.5 h-2.5" />
+                  </button>
+                  <span className="text-xs font-bold tabular-nums w-4 text-center">{previewQty}</span>
+                  <button
+                    onClick={() => setPreviewQty(previewQty + 1)}
+                    className="w-5 h-5 rounded bg-muted flex items-center justify-center hover:bg-muted-foreground/20"
+                    disabled={!!sel}
+                  >
+                    <Plus className="w-2.5 h-2.5" />
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={cn(
+                    "text-xs font-bold tabular-nums",
+                    liveImpact > 0 ? "text-success" : "text-destructive"
+                  )}>
+                    {liveImpact >= 0 ? "+" : ""}R$ {Math.abs(liveImpact)}
+                  </span>
+                  <button
+                    onClick={() => onToggle(eq.equivalent, previewQty)}
                     className={cn(
                       "w-6 h-6 rounded-full flex items-center justify-center transition-all",
                       sel
@@ -227,24 +253,6 @@ export const EquivalenceItems = ({ selectedItems, onToggle, onQuantity }: Omit<P
                   </button>
                 </div>
               </div>
-              {sel && (
-                <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/50 animate-fade-in">
-                  <span className="text-[10px] text-muted-foreground">Qtd:</span>
-                  <button
-                    onClick={() => onQuantity(eq.equivalent, Math.max(1, (sel.quantity || 1) - 1))}
-                    className="w-5 h-5 rounded bg-muted flex items-center justify-center hover:bg-muted-foreground/20"
-                  >
-                    <Minus className="w-2.5 h-2.5" />
-                  </button>
-                  <span className="text-xs font-bold tabular-nums w-4 text-center">{sel.quantity}</span>
-                  <button
-                    onClick={() => onQuantity(eq.equivalent, (sel.quantity || 1) + 1)}
-                    className="w-5 h-5 rounded bg-muted flex items-center justify-center hover:bg-muted-foreground/20"
-                  >
-                    <Plus className="w-2.5 h-2.5" />
-                  </button>
-                </div>
-              )}
             </div>
           );
         })}
