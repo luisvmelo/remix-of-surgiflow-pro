@@ -373,6 +373,13 @@ const DoctorGuiaDetail = () => {
             <XCircle className="w-4 h-4 mr-1.5" /> Devolver
           </Button>
           <Button
+            variant="outline"
+            className="flex-1 h-12 text-sm font-semibold"
+            onClick={() => navigate(`/medico/guia/${id}/editar`)}
+          >
+            <Edit3 className="w-4 h-4 mr-1.5" /> Editar
+          </Button>
+          <Button
             className="flex-1 h-12 text-sm font-semibold"
             onClick={() => setApproved(true)}
           >
