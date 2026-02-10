@@ -83,6 +83,8 @@ const StepItems = () => {
           <MetricsBar />
         </div>
 
+        <ItemSmartSelection selectedItems={selectedItems} onApplyAll={applyAllItems} />
+
         <ItemSearch selectedItems={selectedItems} onToggle={toggleItem} />
 
         <SuggestedItems
