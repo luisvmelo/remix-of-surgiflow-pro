@@ -3,6 +3,7 @@ import { useSurgical } from "@/contexts/SurgicalContext";
 import { mockExtractedItems } from "@/lib/mockData";
 import { SuggestedProcedures, HistoricalProcedures } from "./procedures/ProcedureLists";
 import GuiaCart from "./procedures/GuiaCart";
+import MetricsBar from "./MetricsBar";
 
 const StepUpload = () => {
   const { state, updateState, setStep } = useSurgical();
@@ -28,13 +29,15 @@ const StepUpload = () => {
   return (
     <div className="flex h-full">
       {/* Left: procedure lists */}
-      <div className="flex-1 overflow-y-auto p-6 lg:p-8 space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground mb-1">Procedimentos Secundários</h2>
-          <p className="text-muted-foreground text-sm">
-            Selecione procedimentos complementares para{" "}
-            <strong className="text-foreground">{state.selectedProcedure?.name}</strong>
-          </p>
+      <div className="flex-1 overflow-y-auto p-4 lg:px-6 lg:pt-4 lg:pb-6 space-y-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-bold text-foreground leading-tight">Procedimentos Secundários</h2>
+            <p className="text-muted-foreground text-xs mt-0.5">
+              Complementares para <strong className="text-foreground">{state.selectedProcedure?.name}</strong>
+            </p>
+          </div>
+          <MetricsBar />
         </div>
 
         <SuggestedProcedures
