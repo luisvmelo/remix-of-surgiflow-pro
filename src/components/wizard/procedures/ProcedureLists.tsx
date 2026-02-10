@@ -108,7 +108,7 @@ export const SuggestedProcedures = ({ selectedCodes, onToggle, operadoraName }: 
       <p className="text-xs text-muted-foreground mb-4">
         Baseado no histórico do médico e perfil da operadora
       </p>
-      <div className="space-y-2">
+      <div className="grid grid-cols-2 gap-2">
         {suggested.map((proc) => (
           <ProcedureCard
             key={proc.code}
