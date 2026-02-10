@@ -9,9 +9,8 @@ const StepUpload = () => {
   const { state, updateState, setStep } = useSurgical();
   const [dragOver, setDragOver] = useState(false);
   const [phase, setPhase] = useState<"idle" | "reading" | "extracting">("idle");
-  const [selectedProc, setSelectedProc] = useState(state.selectedProcedure);
-  const [procSearch, setProcSearch] = useState("");
   const [linkedProcs, setLinkedProcs] = useState<string[]>(state.linkedProcedures);
+  const selectedProc = state.selectedProcedure;
 
   // Sort linked procedures: doctor's first, then by approval rate
   const sortedLinked = [...mockLinkedProcedures].sort((a, b) => {
