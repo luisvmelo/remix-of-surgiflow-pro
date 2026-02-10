@@ -1,12 +1,12 @@
 import { useSurgical } from "@/contexts/SurgicalContext";
 import { WizardStep } from "@/lib/mockData";
-import { Check, AlertCircle, User, Upload, FileCheck, FileText, ClipboardList } from "lucide-react";
+import { Check, AlertCircle, User, Upload, Package, FileCheck, FileText, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const steps: { label: string; icon: React.ElementType; step: WizardStep }[] = [
   { label: "Paciente e Cirurgia", icon: User, step: 1 },
   { label: "Proc. Secundários", icon: Upload, step: 2 },
-  { label: "Conferência", icon: FileCheck, step: 3 },
+  { label: "Itens OPME", icon: Package, step: 3 },
   { label: "Documentos", icon: FileText, step: 4 },
 ];
 

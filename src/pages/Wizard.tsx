@@ -1,9 +1,8 @@
 import { useSurgical } from "@/contexts/SurgicalContext";
 import WizardSidebar from "@/components/wizard/WizardSidebar";
-import MetricsBar from "@/components/wizard/MetricsBar";
 import StepPatient from "@/components/wizard/StepPatient";
 import StepUpload from "@/components/wizard/StepUpload";
-import StepConference from "@/components/wizard/StepConference";
+import StepItems from "@/components/wizard/StepItems";
 import StepDocuments from "@/components/wizard/StepDocuments";
 import StepSummary from "@/components/wizard/StepSummary";
 import { Activity } from "lucide-react";
@@ -12,7 +11,7 @@ const stepComponents = [
   null, // step 0 not rendered here
   StepPatient,
   StepUpload,
-  StepConference,
+  StepItems,
   StepDocuments,
 ];
 
