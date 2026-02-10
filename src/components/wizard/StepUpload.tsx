@@ -18,6 +18,13 @@ const StepUpload = () => {
     );
   };
 
+  const applyAll = (codes: string[]) => {
+    setLinkedProcs((prev) => {
+      const newCodes = codes.filter((c) => !prev.includes(c));
+      return [...prev, ...newCodes];
+    });
+  };
+
   // Recalculate metrics whenever selected procedures change
   useEffect(() => {
     const selected = mockLinkedProcedures.filter((p) => linkedProcs.includes(p.code));
