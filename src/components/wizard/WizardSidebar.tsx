@@ -4,8 +4,8 @@ import { Check, AlertCircle, User, Upload, FileCheck, FileText, ClipboardList } 
 import { cn } from "@/lib/utils";
 
 const steps: { label: string; icon: React.ElementType; step: WizardStep }[] = [
-  { label: "Paciente", icon: User, step: 1 },
-  { label: "Upload Guia", icon: Upload, step: 2 },
+  { label: "Paciente e Cirurgia", icon: User, step: 1 },
+  { label: "Guia e Atrelados", icon: Upload, step: 2 },
   { label: "Conferência", icon: FileCheck, step: 3 },
   { label: "Documentos", icon: FileText, step: 4 },
 ];
