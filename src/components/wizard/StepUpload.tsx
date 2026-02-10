@@ -1,10 +1,8 @@
 import { useState, useCallback } from "react";
 import { useSurgical } from "@/contexts/SurgicalContext";
-import { mockExtractedItems, mockProcedures, mockLinkedProcedures } from "@/lib/mockData";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { mockExtractedItems, mockLinkedProcedures } from "@/lib/mockData";
 import { Label } from "@/components/ui/label";
-import { Upload, CheckCircle2, AlertTriangle, Loader2, FileUp, Stethoscope, Search, Plus, Minus, TrendingDown, Zap } from "lucide-react";
+import { Upload, CheckCircle2, Loader2, FileUp, Plus, Minus, TrendingDown, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const StepUpload = () => {
