@@ -68,6 +68,8 @@ const StepUpload = () => {
           <MetricsBar />
         </div>
 
+        <SmartSelection selectedCodes={linkedProcs} onApplyAll={applyAll} />
+
         <ProcedureSearch
           selectedCodes={linkedProcs}
           onToggle={toggleLinked}
