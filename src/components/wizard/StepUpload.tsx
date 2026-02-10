@@ -4,10 +4,13 @@ import { mockExtractedItems } from "@/lib/mockData";
 import { SuggestedProcedures, HistoricalProcedures } from "./procedures/ProcedureLists";
 import GuiaCart from "./procedures/GuiaCart";
 import MetricsBar from "./MetricsBar";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 const StepUpload = () => {
   const { state, updateState, setStep } = useSurgical();
   const [linkedProcs, setLinkedProcs] = useState<string[]>(state.linkedProcedures);
+  const [search, setSearch] = useState("");
   const operadoraName = state.operadora?.name || "—";
 
   const toggleLinked = (code: string) => {
@@ -40,16 +43,28 @@ const StepUpload = () => {
           <MetricsBar />
         </div>
 
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar procedimento por nome ou código..."
+            className="pl-10 h-9 text-sm"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
         <SuggestedProcedures
           selectedCodes={linkedProcs}
           onToggle={toggleLinked}
           operadoraName={operadoraName}
+          search={search}
         />
 
         <HistoricalProcedures
           selectedCodes={linkedProcs}
           onToggle={toggleLinked}
           operadoraName={operadoraName}
+          search={search}
         />
       </div>
 
