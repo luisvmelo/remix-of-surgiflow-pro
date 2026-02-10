@@ -3,6 +3,7 @@ import { useSurgical } from "@/contexts/SurgicalContext";
 import { mockExtractedItems, mockLinkedProcedures } from "@/lib/mockData";
 import { SuggestedProcedures, HistoricalProcedures } from "./procedures/ProcedureLists";
 import ProcedureSearch from "./procedures/ProcedureSearch";
+import SmartSelection from "./procedures/SmartSelection";
 import GuiaCart from "./procedures/GuiaCart";
 import MetricsBar from "./MetricsBar";
 
@@ -15,6 +16,13 @@ const StepUpload = () => {
     setLinkedProcs((prev) =>
       prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
     );
+  };
+
+  const applyAll = (codes: string[]) => {
+    setLinkedProcs((prev) => {
+      const newCodes = codes.filter((c) => !prev.includes(c));
+      return [...prev, ...newCodes];
+    });
   };
 
   // Recalculate metrics whenever selected procedures change
@@ -59,6 +67,8 @@ const StepUpload = () => {
           </div>
           <MetricsBar />
         </div>
+
+        <SmartSelection selectedCodes={linkedProcs} onApplyAll={applyAll} />
 
         <ProcedureSearch
           selectedCodes={linkedProcs}
