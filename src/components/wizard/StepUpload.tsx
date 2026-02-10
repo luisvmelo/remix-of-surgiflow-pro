@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSurgical } from "@/contexts/SurgicalContext";
-import { mockExtractedItems } from "@/lib/mockData";
+import { mockExtractedItems, mockLinkedProcedures } from "@/lib/mockData";
 import { SuggestedProcedures, HistoricalProcedures } from "./procedures/ProcedureLists";
 import ProcedureSearch from "./procedures/ProcedureSearch";
 import GuiaCart from "./procedures/GuiaCart";
@@ -16,6 +16,25 @@ const StepUpload = () => {
       prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
     );
   };
+
+  // Recalculate metrics whenever selected procedures change
+  useEffect(() => {
+    const selected = mockLinkedProcedures.filter((p) => linkedProcs.includes(p.code));
+    const baseRent = 4;
+    const rentBonus = selected.reduce((acc, p) => {
+      const val = parseInt(p.rentabilityDelta.replace(/[^\d-]/g, "")) || 0;
+      return acc + (val > 0 ? 3 : -2);
+    }, 0);
+    const glossBase = 8;
+    const glossDelta = selected.reduce((acc, p) => {
+      return acc + (p.isGlosado ? 6 : p.glossRate > 15 ? 3 : -1);
+    }, 0);
+
+    updateState({
+      rentabilityScore: baseRent + rentBonus,
+      glossRisk: Math.max(0, glossBase + glossDelta),
+    });
+  }, [linkedProcs]);
 
   const handleNext = () => {
     updateState({
