@@ -51,14 +51,12 @@ const StepUpload = () => {
           selectedCodes={linkedProcs}
           onToggle={toggleLinked}
           operadoraName={operadoraName}
-          search={search}
         />
 
         <HistoricalProcedures
           selectedCodes={linkedProcs}
           onToggle={toggleLinked}
           operadoraName={operadoraName}
-          search={search}
         />
       </div>
 
