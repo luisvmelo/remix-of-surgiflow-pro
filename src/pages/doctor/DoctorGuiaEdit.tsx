@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowLeft, FileText, Package, Plus, Minus, Search,
   CheckCircle2, AlertTriangle, ShieldAlert, Lightbulb,
-  ChevronRight, X, TrendingUp
+  ChevronRight, X, TrendingUp, Shield
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,11 @@ import { cn } from "@/lib/utils";
 const mockGuideData: Record<string, any> = {
   d1: {
     procedure: "Artroscopia de Joelho — Meniscectomia", code: "30725119",
+    rentability: 12, glossRisk: 8,
+    suggestions: [
+      { text: "Adicionar Condroplastia pode aumentar rentabilidade em +R$ 820", type: "success" as const },
+      { text: "Todos os itens conferidos — sem ofensores", type: "success" as const },
+    ],
     procedures: [
       { id: "p1", name: "Artroscopia de Joelho — Meniscectomia", code: "30725119", type: "principal" },
       { id: "p2", name: "Condroplastia artroscópica", code: "30725020", delta: "+R$ 820" },
@@ -28,6 +33,11 @@ const mockGuideData: Record<string, any> = {
   },
   d2: {
     procedure: "Reconstrução de LCA", code: "30725097",
+    rentability: 6, glossRisk: 22,
+    suggestions: [
+      { text: "Substituir Implante Interferencial Titânio por PEEK — economia de R$ 520", type: "warning" as const },
+      { text: "Âncora Bio-Compósita é ofensor — considere Âncora PEEK 5.5mm", type: "warning" as const },
+    ],
     procedures: [
       { id: "p1", name: "Reconstrução de LCA", code: "30725097", type: "principal" },
       { id: "p2", name: "Sinovectomia parcial", code: "30715024", delta: "+R$ 350" },
@@ -41,6 +51,11 @@ const mockGuideData: Record<string, any> = {
   },
   d3: {
     procedure: "Artroscopia de Ombro — Reparo do manguito", code: "30725038",
+    rentability: 18, glossRisk: 5,
+    suggestions: [
+      { text: "Excelente rentabilidade — acima do percentil 85", type: "success" as const },
+      { text: "Lâmina Shaver tem risco de glosa leve — monitorar", type: "info" as const },
+    ],
     procedures: [
       { id: "p1", name: "Artroscopia de Ombro — Reparo do manguito", code: "30725038", type: "principal" },
       { id: "p2", name: "Condroplastia artroscópica", code: "30725020", delta: "+R$ 820" },
@@ -206,6 +221,54 @@ const DoctorGuiaEdit = () => {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
+        {/* Metrics bar */}
+        <div className="grid grid-cols-2 gap-2 px-4 py-3">
+          <div className="glass-card rounded-xl p-2.5 flex items-center gap-2">
+            <TrendingUp className={cn("w-4 h-4", guideData.rentability > 15 ? "text-success" : guideData.rentability > 0 ? "text-warning" : "text-destructive")} />
+            <div>
+              <div className={cn("text-lg font-extrabold leading-none", guideData.rentability > 15 ? "text-success" : guideData.rentability > 0 ? "text-warning" : "text-destructive")}>
+                +{guideData.rentability}%
+              </div>
+              <div className="text-[9px] text-muted-foreground">Rentabilidade</div>
+            </div>
+          </div>
+          <div className="glass-card rounded-xl p-2.5 flex items-center gap-2">
+            <Shield className={cn("w-4 h-4", guideData.glossRisk < 15 ? "text-success" : "text-warning")} />
+            <div>
+              <div className={cn("text-lg font-extrabold leading-none", guideData.glossRisk < 15 ? "text-success" : "text-warning")}>
+                {guideData.glossRisk}%
+              </div>
+              <div className="text-[9px] text-muted-foreground">Risco Glosa</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Suggestions */}
+        {guideData.suggestions && guideData.suggestions.length > 0 && (
+          <div className="px-4 pb-3">
+            <div className={cn(
+              "rounded-xl p-3 border",
+              guideData.suggestions.some((s: any) => s.type === "warning") ? "bg-warning/5 border-warning/20" :
+              "bg-success/5 border-success/20"
+            )}>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Lightbulb className="w-3.5 h-3.5 text-accent" />
+                <span className="text-[11px] font-bold text-foreground">Sugestões de Melhoria</span>
+              </div>
+              <div className="space-y-1.5">
+                {guideData.suggestions.map((s: any, idx: number) => (
+                  <div key={idx} className="flex items-start gap-2 text-[11px]">
+                    {s.type === "success" && <CheckCircle2 className="w-3 h-3 text-success shrink-0 mt-0.5" />}
+                    {s.type === "warning" && <AlertTriangle className="w-3 h-3 text-warning shrink-0 mt-0.5" />}
+                    {s.type === "info" && <Lightbulb className="w-3 h-3 text-primary shrink-0 mt-0.5" />}
+                    <span className="text-foreground">{s.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Add panel (slide overlay) */}
         {showAddPanel && (
           <div className="px-4 pt-3 pb-2 border-b bg-muted/30">
@@ -385,23 +448,23 @@ const DoctorGuiaEdit = () => {
       </div>
 
       {/* Bottom action bar */}
-      <div className="border-t bg-card px-4 py-3 safe-area-bottom space-y-2">
-        <div className="flex gap-3">
+      <div className="border-t bg-card px-4 py-3 safe-area-bottom space-y-2 overflow-hidden">
+        <div className="flex gap-2">
           {!showAddPanel && (
             <Button
               variant="outline"
-              className="flex-1 h-11 text-sm font-semibold"
+              className="flex-1 h-11 text-xs font-semibold min-w-0"
               onClick={() => setShowAddPanel(true)}
             >
-              <Plus className="w-4 h-4 mr-1.5" />
-              Adicionar {activeTab === "procedures" ? "Procedimento" : "Item"}
+              <Plus className="w-4 h-4 mr-1 shrink-0" />
+              <span className="truncate">Adicionar</span>
             </Button>
           )}
           <Button
-            className="flex-1 h-11 text-sm font-semibold"
+            className="flex-1 h-11 text-xs font-semibold min-w-0"
             onClick={() => navigate(`/medico/guia/${id}`)}
           >
-            <CheckCircle2 className="w-4 h-4 mr-1.5" /> Salvar Alterações
+            <CheckCircle2 className="w-4 h-4 mr-1 shrink-0" /> <span className="truncate">Salvar</span>
           </Button>
         </div>
       </div>

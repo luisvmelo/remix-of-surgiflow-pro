@@ -4,7 +4,7 @@ import { useSurgical } from "@/contexts/SurgicalContext";
 import {
   Activity, Clock, CheckCircle2, AlertTriangle, User, Building,
   Calendar, Package, ChevronRight, FileEdit, ShieldCheck, Send,
-  Settings, Plus, X, Sparkles, Check, RotateCcw, SendHorizontal
+  Settings, Plus, X, Sparkles, Check, RotateCcw, SendHorizontal, XCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -257,10 +257,9 @@ const DoctorHome = () => {
           </div>
         ) : (
           items.map((req) => (
-            <button
+            <div
               key={req.id}
-              onClick={() => navigate(`/medico/guia/${req.id}`)}
-              className="w-full text-left glass-card rounded-xl overflow-hidden active:scale-[0.98] transition-transform"
+              className="w-full text-left glass-card rounded-xl overflow-hidden"
             >
               {/* Top accent */}
               <div className={cn(
@@ -268,14 +267,25 @@ const DoctorHome = () => {
                 req.status === "awaiting-validation" ? "bg-warning" : "bg-success"
               )} />
 
-              <div className="p-4">
-                {/* Procedure */}
+              <button
+                onClick={() => navigate(`/medico/guia/${req.id}`)}
+                className="w-full text-left p-4 active:scale-[0.98] transition-transform"
+              >
+                {/* Procedure + improvement index */}
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <div className="flex-1 min-w-0">
                     <div className="font-bold text-foreground text-sm leading-tight">{req.procedure}</div>
                     <div className="text-[10px] text-muted-foreground font-mono mt-0.5">{req.code}</div>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {(req.hasOffenders || parseInt(req.glossRisk) >= 15) && (
+                      <span className="flex items-center gap-1 bg-accent/15 text-accent text-[9px] font-bold px-2 py-1 rounded-full">
+                        <Sparkles className="w-3 h-3" />
+                        Pode melhorar
+                      </span>
+                    )}
+                    <ChevronRight className="w-5 h-5 text-muted-foreground mt-0.5" />
+                  </div>
                 </div>
 
                 {/* Info */}
@@ -321,8 +331,27 @@ const DoctorHome = () => {
                     </span>
                   )}
                 </div>
-              </div>
-            </button>
+              </button>
+
+              {/* Quick actions */}
+              {req.status === "awaiting-validation" && (
+                <div className="flex border-t border-border/50">
+                  <button
+                    onClick={() => navigate(`/medico/guia/${req.id}`)}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] font-semibold text-destructive/70 hover:bg-destructive/5 transition-colors"
+                  >
+                    <XCircle className="w-3.5 h-3.5" /> Devolver
+                  </button>
+                  <div className="w-px bg-border/50" />
+                  <button
+                    onClick={() => navigate(`/medico/guia/${req.id}`)}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] font-semibold text-success hover:bg-success/5 transition-colors"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Aprovar
+                  </button>
+                </div>
+              )}
+            </div>
           ))
         )}
       </div>
