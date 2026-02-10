@@ -16,11 +16,11 @@ const StepItems = () => {
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
   const operadoraName = state.operadora?.name || "—";
 
-  const toggleItem = (name: string) => {
+  const toggleItem = (name: string, quantity?: number) => {
     setSelectedItems((prev) =>
       prev.some((s) => s.name === name)
         ? prev.filter((s) => s.name !== name)
-        : [...prev, { name, quantity: 1 }]
+        : [...prev, { name, quantity: quantity || 1 }]
     );
   };
 
