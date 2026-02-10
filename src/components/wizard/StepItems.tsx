@@ -4,6 +4,7 @@ import { mockRecommendedOPMEs } from "@/lib/mockData";
 import { SuggestedItems, HistoricalItems, EquivalenceItems } from "./items/ItemLists";
 import ItemSearch from "./items/ItemSearch";
 import ItemCart from "./items/ItemCart";
+import ItemSmartSelection from "./items/ItemSmartSelection";
 import MetricsBar from "./MetricsBar";
 
 interface SelectedItem {
