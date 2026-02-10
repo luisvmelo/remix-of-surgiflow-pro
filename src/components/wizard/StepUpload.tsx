@@ -25,14 +25,6 @@ const StepUpload = () => {
     );
   };
 
-  const doctorProcs = mockProcedures.filter((p) => p.doctorUses);
-  const searchResults = procSearch.length >= 2
-    ? mockProcedures.filter(
-        (p) =>
-          p.name.toLowerCase().includes(procSearch.toLowerCase()) ||
-          p.code.includes(procSearch)
-      )
-    : [];
 
   const simulateUpload = useCallback((name: string) => {
     setPhase("reading");
