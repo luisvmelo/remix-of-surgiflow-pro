@@ -38,7 +38,7 @@ const Wizard = () => {
             </span>
           )}
         </div>
-        {state.currentStep >= 3 && <RentabilityIndicator />}
+        {/* metrics bar moved below */}
       </header>
 
       <div className="flex flex-1 overflow-hidden">
