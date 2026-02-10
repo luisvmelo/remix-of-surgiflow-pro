@@ -95,9 +95,10 @@ const ProcedureCard = ({
   );
 };
 
-export const SuggestedProcedures = ({ selectedCodes, onToggle, operadoraName }: Props) => {
+export const SuggestedProcedures = ({ selectedCodes, onToggle, operadoraName, search = "" }: Props) => {
   const suggested = mockLinkedProcedures.filter(
     (p) => p.doctorUses || p.improvesRent
+  ).filter((p) => !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.code.includes(search)
   ).sort((a, b) => b.approvalRate - a.approvalRate);
 
   return (
