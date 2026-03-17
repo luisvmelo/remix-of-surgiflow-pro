@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   CheckCircle2, TrendingUp, AlertTriangle, Shield, User, Stethoscope,
   Building, FileText, Package, Send, ClipboardList, RotateCcw,
-  ShieldCheck, Edit3, Clock, History
+  ShieldCheck, Edit3, Clock, History, ArrowLeft
 } from "lucide-react";
 import { mockLinkedProcedures, mockExtractedItems, mockDocuments, mockRecommendedOPMEs } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
