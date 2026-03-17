@@ -114,6 +114,12 @@ const StepPackageReview = () => {
       {/* Header */}
       <div>
         <div className="flex items-center gap-3 mb-2">
+          <button
+            onClick={handleBack}
+            className="p-2 rounded-xl hover:bg-muted transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+          </button>
           <div className="p-2 rounded-xl bg-primary/10">
             <History className="w-5 h-5 text-primary" />
           </div>
