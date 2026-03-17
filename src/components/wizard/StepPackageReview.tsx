@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   CheckCircle2, TrendingUp, AlertTriangle, Shield, User, Stethoscope,
   Building, FileText, Package, Send, ClipboardList, RotateCcw,
-  ShieldCheck, Edit3, Clock, History
+  ShieldCheck, Edit3, Clock, History, ArrowLeft
 } from "lucide-react";
 import { mockLinkedProcedures, mockExtractedItems, mockDocuments, mockRecommendedOPMEs } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
@@ -80,6 +80,14 @@ const StepPackageReview = () => {
     navigate("/medico");
   };
 
+  const handleBack = () => {
+    updateState({
+      showPackageReview: false,
+      currentStep: 1,
+    });
+    setStep(1);
+  };
+
   const handleEdit = () => {
     // Pre-fill state with package data and go to wizard step 2
     updateState({
@@ -106,6 +114,12 @@ const StepPackageReview = () => {
       {/* Header */}
       <div>
         <div className="flex items-center gap-3 mb-2">
+          <button
+            onClick={handleBack}
+            className="p-2 rounded-xl hover:bg-muted transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+          </button>
           <div className="p-2 rounded-xl bg-primary/10">
             <History className="w-5 h-5 text-primary" />
           </div>
