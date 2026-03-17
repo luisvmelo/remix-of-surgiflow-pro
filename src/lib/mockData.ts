@@ -106,6 +106,7 @@ export interface WizardState {
   glossRisk: number;
   historicalPercentile: number;
   bestPossible: number;
+  showPackageReview: boolean;
 }
 
 export interface SavedRequest {
