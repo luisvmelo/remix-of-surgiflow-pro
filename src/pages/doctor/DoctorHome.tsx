@@ -94,10 +94,20 @@ const DoctorHome = () => {
             <Activity className="w-5 h-5" />
             <span className="font-bold text-sm">SolicitaCirurg</span>
           </div>
-          <Sheet>
-            <SheetTrigger asChild>
-              <button className="p-2 rounded-full hover:bg-primary-foreground/10 transition-colors">
-                <Settings className="w-5 h-5" />
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => {
+                resetWizard();
+                navigate("/wizard");
+              }}
+              className="p-2 rounded-full hover:bg-primary-foreground/10 transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+            <Sheet>
+              <SheetTrigger asChild>
+                <button className="p-2 rounded-full hover:bg-primary-foreground/10 transition-colors">
+                  <Settings className="w-5 h-5" />
               </button>
             </SheetTrigger>
             <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
