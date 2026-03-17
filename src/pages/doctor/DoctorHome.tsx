@@ -215,6 +215,7 @@ const DoctorHome = () => {
               </div>
             </SheetContent>
           </Sheet>
+          </div>
         </div>
         <h1 className="text-xl font-bold">Olá, {state.doctor?.name?.split(" ").slice(0, 2).join(" ") || "Doutor"}</h1>
         <p className="text-primary-foreground/70 text-xs mt-0.5">
