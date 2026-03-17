@@ -54,7 +54,7 @@ const mockDoctorRequests = [
 type Tab = "pending" | "approved";
 
 const DoctorHome = () => {
-  const { state } = useSurgical();
+  const { state, resetWizard } = useSurgical();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>("pending");
 
@@ -94,10 +94,20 @@ const DoctorHome = () => {
             <Activity className="w-5 h-5" />
             <span className="font-bold text-sm">SolicitaCirurg</span>
           </div>
-          <Sheet>
-            <SheetTrigger asChild>
-              <button className="p-2 rounded-full hover:bg-primary-foreground/10 transition-colors">
-                <Settings className="w-5 h-5" />
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => {
+                resetWizard();
+                navigate("/wizard");
+              }}
+              className="p-2 rounded-full hover:bg-primary-foreground/10 transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+            <Sheet>
+              <SheetTrigger asChild>
+                <button className="p-2 rounded-full hover:bg-primary-foreground/10 transition-colors">
+                  <Settings className="w-5 h-5" />
               </button>
             </SheetTrigger>
             <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
@@ -205,6 +215,7 @@ const DoctorHome = () => {
               </div>
             </SheetContent>
           </Sheet>
+          </div>
         </div>
         <h1 className="text-xl font-bold">Olá, {state.doctor?.name?.split(" ").slice(0, 2).join(" ") || "Doutor"}</h1>
         <p className="text-primary-foreground/70 text-xs mt-0.5">
