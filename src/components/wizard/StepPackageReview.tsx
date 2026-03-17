@@ -256,23 +256,23 @@ const StepPackageReview = () => {
       </div>
 
       {/* Action buttons */}
-      <div className="flex gap-3 pt-2 sticky bottom-4">
+      <div className="flex gap-3 pt-2 pb-4">
         <Button
           variant="outline"
           size="lg"
-          className="flex-1 gap-2"
+          className="flex-1 gap-2 min-w-0"
           onClick={handleEdit}
         >
-          <Edit3 className="w-4 h-4" />
-          Editar Guia
+          <Edit3 className="w-4 h-4 shrink-0" />
+          <span className="truncate">Editar Guia</span>
         </Button>
         <Button
           size="lg"
-          className="flex-1 gap-2"
+          className="flex-1 gap-2 min-w-0"
           onClick={handleConfirm}
         >
-          <Send className="w-4 h-4" />
-          Confirmar e Enviar
+          <Send className="w-4 h-4 shrink-0" />
+          <span className="truncate">Confirmar e Enviar</span>
         </Button>
       </div>
     </div>
