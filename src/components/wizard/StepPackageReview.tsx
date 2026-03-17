@@ -80,6 +80,14 @@ const StepPackageReview = () => {
     navigate("/medico");
   };
 
+  const handleBack = () => {
+    updateState({
+      showPackageReview: false,
+      currentStep: 1,
+    });
+    setStep(1);
+  };
+
   const handleEdit = () => {
     // Pre-fill state with package data and go to wizard step 2
     updateState({
