@@ -44,16 +44,17 @@ const StepPatient = () => {
     const operadora = mockOperadoras.find((o) => o.id === operadoraId) || null;
     const patient = selectedPatient || (showNew ? { id: "new", name: newData.name, cpf: newData.cpf, birthDate: newData.birthDate, phone: newData.phone, motherName: "", operadoraId } : null);
     if (patient && operadora && selectedProc) {
+      const isDoctorFlow = state.isDoctorFlow;
       updateState({
         patient,
         operadora,
         selectedProcedure: selectedProc,
-        currentStep: 2,
+        currentStep: isDoctorFlow ? 2 : 2,
         rentabilityScore: 0,
         glossRisk: 0,
         historicalPercentile: 0,
         bestPossible: 0,
-        showPackageReview: true,
+        showPackageReview: isDoctorFlow,
       });
       setStep(2);
     }

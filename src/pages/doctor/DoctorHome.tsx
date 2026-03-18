@@ -98,6 +98,7 @@ const DoctorHome = () => {
             <button
               onClick={() => {
                 resetWizard();
+                updateState({ isDoctorFlow: true });
                 navigate("/wizard");
               }}
               className="p-2 rounded-full hover:bg-primary-foreground/10 transition-colors"
