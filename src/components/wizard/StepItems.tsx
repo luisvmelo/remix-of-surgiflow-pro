@@ -91,6 +91,8 @@ const StepItems = () => {
           <MetricsBar />
         </div>
 
+        <SupplierSelection selectedSuppliers={selectedSuppliers} onToggleSupplier={toggleSupplier} />
+
         <ItemSmartSelection selectedItems={selectedItems} onApplyAll={applyAllItems} />
 
         <ItemSearch selectedItems={selectedItems} onToggle={toggleItem} />
