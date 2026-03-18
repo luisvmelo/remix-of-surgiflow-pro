@@ -54,7 +54,7 @@ const mockDoctorRequests = [
 type Tab = "pending" | "approved";
 
 const DoctorHome = () => {
-  const { state, resetWizard } = useSurgical();
+  const { state, resetWizard, updateState } = useSurgical();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>("pending");
 
