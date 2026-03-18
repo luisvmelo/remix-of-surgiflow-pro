@@ -109,8 +109,8 @@ const DoctorHome = () => {
               <SheetTrigger asChild>
                 <button className="p-2 rounded-full hover:bg-primary-foreground/10 transition-colors">
                   <Settings className="w-5 h-5" />
-              </button>
-            </SheetTrigger>
+                </button>
+              </SheetTrigger>
             <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
               <SheetHeader>
                 <SheetTitle className="text-lg">Configurações de Análise</SheetTitle>

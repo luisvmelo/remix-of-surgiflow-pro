@@ -5,6 +5,7 @@ import { SuggestedItems, HistoricalItems, EquivalenceItems } from "./items/ItemL
 import ItemSearch from "./items/ItemSearch";
 import ItemCart from "./items/ItemCart";
 import ItemSmartSelection from "./items/ItemSmartSelection";
+import SupplierSelection from "./items/SupplierSelection";
 import MetricsBar from "./MetricsBar";
 
 interface SelectedItem {
@@ -15,7 +16,14 @@ interface SelectedItem {
 const StepItems = () => {
   const { state, updateState, setStep } = useSurgical();
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
+  const [selectedSuppliers, setSelectedSuppliers] = useState<string[]>([]);
   const operadoraName = state.operadora?.name || "—";
+
+  const toggleSupplier = (id: string) => {
+    setSelectedSuppliers(prev =>
+      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
+    );
+  };
 
   const toggleItem = (name: string, quantity?: number) => {
     setSelectedItems((prev) =>
@@ -82,6 +90,8 @@ const StepItems = () => {
           </div>
           <MetricsBar />
         </div>
+
+        <SupplierSelection selectedSuppliers={selectedSuppliers} onToggleSupplier={toggleSupplier} />
 
         <ItemSmartSelection selectedItems={selectedItems} onApplyAll={applyAllItems} />
 
