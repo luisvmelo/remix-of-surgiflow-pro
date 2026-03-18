@@ -54,7 +54,7 @@ const mockDoctorRequests = [
 type Tab = "pending" | "approved";
 
 const DoctorHome = () => {
-  const { state, resetWizard } = useSurgical();
+  const { state, resetWizard, updateState } = useSurgical();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>("pending");
 
@@ -98,6 +98,7 @@ const DoctorHome = () => {
             <button
               onClick={() => {
                 resetWizard();
+                updateState({ isDoctorFlow: true });
                 navigate("/wizard");
               }}
               className="p-2 rounded-full hover:bg-primary-foreground/10 transition-colors"

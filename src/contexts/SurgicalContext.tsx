@@ -31,6 +31,7 @@ const initialState: WizardState = {
   historicalPercentile: 0,
   bestPossible: 0,
   showPackageReview: false,
+  isDoctorFlow: false,
 };
 
 export function SurgicalProvider({ children }: { children: ReactNode }) {

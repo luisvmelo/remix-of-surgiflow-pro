@@ -107,6 +107,7 @@ export interface WizardState {
   historicalPercentile: number;
   bestPossible: number;
   showPackageReview: boolean;
+  isDoctorFlow: boolean;
 }
 
 export interface SavedRequest {
