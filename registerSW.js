@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/remix-of-surgiflow-pro/sw.js', { scope: '/remix-of-surgiflow-pro/' })})}
