@@ -5,6 +5,7 @@ import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => ({
+  base: process.env.GITHUB_PAGES ? "/remix-of-surgiflow-pro/" : "/",
   server: {
     host: "::",
     port: 8080,
@@ -29,13 +30,13 @@ export default defineConfig(({ mode }) => ({
         background_color: "#f8fafc",
         display: "standalone",
         orientation: "portrait",
-        scope: "/",
-        start_url: "/",
+        scope: "./",
+        start_url: "./",
         icons: [
-          { src: "/favicon.ico", sizes: "64x64", type: "image/x-icon" },
-          { src: "/pwa-192.png", sizes: "192x192", type: "image/png" },
-          { src: "/pwa-512.png", sizes: "512x512", type: "image/png" },
-          { src: "/pwa-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+          { src: "favicon.ico", sizes: "64x64", type: "image/x-icon" },
+          { src: "pwa-192.png", sizes: "192x192", type: "image/png" },
+          { src: "pwa-512.png", sizes: "512x512", type: "image/png" },
+          { src: "pwa-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
       },
     }),

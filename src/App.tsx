@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import { SurgicalProvider } from "@/contexts/SurgicalContext";
 import Login from "./pages/Login";
 import SelectDoctor from "./pages/SelectDoctor";
@@ -22,7 +22,7 @@ const App = () => (
       <SurgicalProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <HashRouter>
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/select-doctor" element={<SelectDoctor />} />
@@ -34,7 +34,7 @@ const App = () => (
             <Route path="/medico/guia/:id/editar" element={<DoctorGuiaEdit />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
+        </HashRouter>
       </SurgicalProvider>
     </TooltipProvider>
   </QueryClientProvider>
