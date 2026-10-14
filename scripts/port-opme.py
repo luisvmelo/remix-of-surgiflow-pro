@@ -105,6 +105,19 @@ def gerar_css():
     # Variáveis do tema só dentro do OPME
     css = css.replace(":root {", ".opme-theme {")
     css = re.sub(r"^(\s*)\.dark\s*\{", r"\1.dark .opme-theme {", css, flags=re.M)
+    # Tipografia base do OPME só dentro do OPME. :where() mantém a especificidade
+    # de um seletor de elemento, para os utilitários text-* do OPME continuarem vencendo.
+    for antes, depois in [
+        ("  body {\n    @apply bg-background", "  .opme-theme {\n    @apply bg-background"),
+        ("  h1 {", "  :where(.opme-theme) h1 {"),
+        ("  h2 {", "  :where(.opme-theme) h2 {"),
+        ("  h3 {", "  :where(.opme-theme) h3 {"),
+        ("  body, p, .text-body {", "  .opme-theme, :where(.opme-theme) p, .text-body {"),
+        ("  label, .label, legend {", "  :where(.opme-theme) label, .label, :where(.opme-theme) legend {"),
+    ]:
+        if antes not in css:
+            raise SystemExit(f"Trecho não encontrado em index.css do OPME.AI: {antes[:60]!r}")
+        css = css.replace(antes, depois, 1)
     (DESTINO / "opme.css").write_text(css, encoding="utf-8")
 
 

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { AuthProvider } from "@opme/contexts/AuthContext";
 import { HospitalProvider } from "@opme/contexts/HospitalContext";
@@ -12,7 +13,15 @@ import { Toaster as Sonner } from "@opme/components/ui/sonner";
  * Layout das telas do OPME.AI (Compras e Gerente de compras).
  * Fica montado enquanto se navega entre elas, para não perder escolhas e otimizações.
  */
-const OpmeShell = () => (
+const OpmeShell = () => {
+  // Diálogos, menus e painéis do Radix abrem em portais no <body>, fora da div abaixo:
+  // o tema também vai para o <body> enquanto alguma tela do OPME estiver aberta.
+  useEffect(() => {
+    document.body.classList.add("opme-theme");
+    return () => document.body.classList.remove("opme-theme");
+  }, []);
+
+  return (
   <AuthProvider>
     <HospitalProvider>
       <ConfigProvider>
@@ -30,6 +39,7 @@ const OpmeShell = () => (
       </ConfigProvider>
     </HospitalProvider>
   </AuthProvider>
-);
+  );
+};
 
 export default OpmeShell;

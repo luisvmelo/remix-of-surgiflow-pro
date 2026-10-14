@@ -117,26 +117,26 @@
     @apply border-border;
   }
 
-  body {
+  .opme-theme {
     @apply bg-background text-foreground font-sans antialiased;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
   
   /* Typography Scale - DM Sans */
-  h1 {
+  :where(.opme-theme) h1 {
     @apply text-[24px] leading-[32px] font-bold;
   }
   
-  h2 {
+  :where(.opme-theme) h2 {
     @apply text-[20px] leading-[28px] font-bold;
   }
   
-  h3 {
+  :where(.opme-theme) h3 {
     @apply text-[16px] leading-[24px] font-bold;
   }
   
-  body, p, .text-body {
+  .opme-theme, :where(.opme-theme) p, .text-body {
     @apply text-[14px] leading-[20px] font-normal;
   }
   
@@ -175,7 +175,7 @@
   }
   
   /* Typography Weight Variants */
-  label, .label, legend {
+  :where(.opme-theme) label, .label, :where(.opme-theme) legend {
     @apply font-medium; /* 500 */
   }
 }
