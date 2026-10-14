@@ -14,6 +14,8 @@ import DoctorGuiaDetail from "./pages/doctor/DoctorGuiaDetail";
 import DoctorGuiaEdit from "./pages/doctor/DoctorGuiaEdit";
 import HospitalHome from "./pages/hospital/HospitalHome";
 import NotFound from "./pages/NotFound";
+import OpmeShell from "@/opme/OpmeShell";
+import { OPME_ROTAS } from "@/opme/rotas";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +36,11 @@ const App = () => (
             <Route path="/medico/guia/:id" element={<DoctorGuiaDetail />} />
             <Route path="/medico/guia/:id/editar" element={<DoctorGuiaEdit />} />
             <Route path="/hospital" element={<HospitalHome />} />
+            <Route element={<OpmeShell />}>
+              {OPME_ROTAS.map((r) => (
+                <Route key={r.path} path={r.path} element={r.element} />
+              ))}
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </HashRouter>

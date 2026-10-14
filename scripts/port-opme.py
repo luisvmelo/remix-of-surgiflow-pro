@@ -71,6 +71,18 @@ def ajustes():
     substituir("contexts/AuthContext.tsx",
                "const [loading, setLoading] = useState(true);",
                "const [loading, setLoading] = useState(false);")
+    # O módulo Comercial vai para a Gestão (Plano 4); aqui ficam Compras e Gerente de compras
+    substituir("components/Sidebar.tsx",
+               """  {
+    nome: "Estratégico",
+    area: "Comercial",
+    itens: [
+      { path: "/insights", label: "Insights", icon: Lightbulb },
+      { path: "/bi-geral", label: "Resultados", icon: BarChart3 },
+    ],
+  },
+""",
+               "")
     (DESTINO / "components" / "ProtectedRoute.tsx").write_text(
         '// No app unificado o acesso é decidido pelo login por perfil do SurgiFlow.\n'
         'const ProtectedRoute = ({ children }: { children: React.ReactNode }) => <>{children}</>;\n\n'

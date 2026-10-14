@@ -30,14 +30,6 @@ const MODULOS: Modulo[] = [
     area: "Gerente de compras",
     itens: [{ path: "/acompanhamento", label: "Acompanhamento", icon: UserCheck }],
   },
-  {
-    nome: "Estratégico",
-    area: "Comercial",
-    itens: [
-      { path: "/insights", label: "Insights", icon: Lightbulb },
-      { path: "/bi-geral", label: "Resultados", icon: BarChart3 },
-    ],
-  },
 ];
 
 const Sidebar = () => {
