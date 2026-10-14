@@ -224,3 +224,19 @@ export function previsaoMedico(medicoId: string, pedidos: Pedido[], d: Dominio, 
   }
   return r;
 }
+
+/** Desvios do pedido em relação ao padrão, como "itemId:marcaId" (fora do protocolo, fora do leque ou sem homologação). */
+export function desviosPedido(p: Pedido, a: Avaliacao): string[] {
+  return p.itens
+    .filter((i) => a.foraProtocolo.includes(i.itemId) || a.foraPadrao.includes(i.marcaId) || a.naoHomologados.includes(i.marcaId))
+    .map((i) => `${i.itemId}:${i.marcaId}`);
+}
+
+/** O pedido pode ser confirmado por Compras: não tem desvio, ou todos os desvios atuais foram aceitos com motivo. */
+export function desviosCobertos(p: Pedido, a: Avaliacao): boolean {
+  const desvios = desviosPedido(p, a);
+  if (desvios.length === 0) return true;
+  if (!p.aceitoForaPadrao) return false;
+  const cobre = p.aceitoForaPadrao.cobre;
+  return !cobre || desvios.every((d) => cobre.includes(d));
+}

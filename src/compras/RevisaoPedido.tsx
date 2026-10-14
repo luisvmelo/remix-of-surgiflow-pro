@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { useDominio } from "@/dominio/store";
-import { addDias, avaliarPedido, leque } from "@/dominio/motor";
+import { addDias, avaliarPedido, desviosCobertos, desviosPedido, leque } from "@/dominio/motor";
 import type { Avaliacao, Padrao, SugestaoAlteracao } from "@/dominio/tipos";
 import { brl, dataBR } from "@/components/pedido/formato";
 
@@ -77,7 +77,7 @@ const RevisaoPedido = () => {
   const marca = (mid: string) => dominio.marcas.find((m) => m.id === mid);
   const nomeItem = (iid: string) => dominio.itens.find((i) => i.id === iid)?.nome ?? iid;
   const temFora = a.foraPadrao.length + a.foraProtocolo.length + a.naoHomologados.length > 0;
-  const bloqueado = temFora && !pedido.aceitoForaPadrao;
+  const bloqueado = !desviosCobertos(pedido, a);
   const confirmado = pedido.status === "confirmado";
 
   const trocar = (itemId: string, marcaId: string) =>
@@ -98,7 +98,7 @@ const RevisaoPedido = () => {
 
   const confirmarAceite = () => {
     if (!motivo.trim()) return;
-    aceitarForaPadrao(pedido.id, motivo.trim());
+    aceitarForaPadrao(pedido.id, motivo.trim(), desviosPedido(pedido, a));
     const novas = sugestoesDoAceite(padrao, a, pedido.itens, motivo.trim(), (m) => marca(m)?.fabricante ?? m, nomeItem);
     if (novas.length) salvarPadrao({ ...padrao, sugestoes: [...padrao.sugestoes, ...novas] });
     setAviso(novas.length ? `Aceite registrado e ${novas.length} sugestão(ões) enviada(s) à comissão.` : "Aceite registrado.");
@@ -142,7 +142,7 @@ const RevisaoPedido = () => {
                 <Button variant="outline" onClick={() => { setModo("ajuste"); setMotivo(""); }}>
                   <MessageSquareWarning className="w-4 h-4 mr-1" aria-hidden /> Pedir ajuste
                 </Button>
-                {temFora && !pedido.aceitoForaPadrao && (
+                {bloqueado && (
                   <Button variant="outline" onClick={() => { setModo("aceite"); setMotivo(""); }}>
                     <ShieldCheck className="w-4 h-4 mr-1" aria-hidden /> Aceitar fora do padrão
                   </Button>

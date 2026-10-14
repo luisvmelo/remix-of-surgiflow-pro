@@ -289,7 +289,9 @@ export function equilibrio(padrao: Padrao, operadoraId: string, d: Dominio, conf
       return (w.liberacao * norm(m.liberacaoDias, lib, false) + w.glosa * norm(m.glosaPct, glo, false) + w.margem * norm(margemUn(m.custo), mar, true)) / soma;
     };
     const ordem = [...candidatas].sort((a, b) => nota(b) - nota(a) || a.id.localeCompare(b.id));
-    const aceitas = ordem.slice(0, Math.max(3, Math.min(3, ordem.length))).map((m) => m.id);
+    // O padrão é um só: as marcas que esta operadora não homologa continuam aceitas para as outras
+    const deOutras = ip.aceitas.filter((id) => !candidatas.some((m) => m.id === id));
+    const aceitas = [...ordem.slice(0, 3).map((m) => m.id), ...deOutras];
     return { ...ip, aceitas, preferenciais: [ordem[0].id] };
   });
 }

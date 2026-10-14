@@ -103,7 +103,7 @@ export interface SugestaoAlteracao {
   id: string;
   titulo: string;
   motivo: string;
-  tipo: "trocar_marca" | "incluir_item";
+  tipo: "trocar_marca" | "incluir_item" | "tornar_preferencial";
   itemId: string;
   de?: string; // marcaId que sai
   para: string; // marcaId que entra
@@ -186,7 +186,8 @@ export interface Pedido {
   /** Motivo de devolução do médico para a secretária */
   devolvido?: string;
   ajustes: Ajuste[];
-  aceitoForaPadrao?: { motivo: string };
+  /** cobre: desvios aceitos ("itemId:marcaId"); sem a lista, vale para o pedido inteiro (dados antigos) */
+  aceitoForaPadrao?: { motivo: string; cobre?: string[] };
   urgencia: boolean;
   criadoEm: string;
   dataCirurgia: string;

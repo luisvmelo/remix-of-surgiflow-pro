@@ -45,7 +45,7 @@ type Acao =
   | { tipo: "atualizar"; id: string; parcial: Partial<Pedido> }
   | { tipo: "pedirAjuste"; id: string; motivo: string; itemId?: string }
   | { tipo: "resolverAjustes"; id: string }
-  | { tipo: "aceitarForaPadrao"; id: string; motivo: string }
+  | { tipo: "aceitarForaPadrao"; id: string; motivo: string; cobre?: string[] }
   | { tipo: "salvarPadrao"; padrao: Padrao }
   | { tipo: "sugestao"; procedimentoId: string; sugestaoId: string; aceitar: boolean }
   | { tipo: "contratoMedico"; contrato: ContratoMedico }
@@ -73,7 +73,7 @@ function reducer(e: Estado, a: Acao): Estado {
     case "resolverAjustes":
       return mapPedido(e, a.id, (p) => ({ ...p, ajustes: p.ajustes.map((x) => ({ ...x, resolvido: true })) }));
     case "aceitarForaPadrao":
-      return mapPedido(e, a.id, (p) => ({ ...p, aceitoForaPadrao: { motivo: a.motivo } }));
+      return mapPedido(e, a.id, (p) => ({ ...p, aceitoForaPadrao: { motivo: a.motivo, cobre: a.cobre } }));
     case "salvarPadrao":
       return { ...e, padroes: { ...e.padroes, [a.padrao.procedimentoId]: a.padrao } };
     case "sugestao": {
@@ -87,11 +87,23 @@ function reducer(e: Estado, a: Acao): Estado {
         return sem.includes(sug.para) ? sem : [...sem, sug.para];
       };
       const itens = padrao.itens.some((i) => i.itemId === sug.itemId)
-        ? padrao.itens.map((i) =>
-            i.itemId === sug.itemId
-              ? { ...i, aceitas: troca(i.aceitas), preferenciais: sug.de && i.preferenciais.includes(sug.de) ? troca(i.preferenciais) : i.preferenciais }
-              : i)
+        ? padrao.itens.map((i) => {
+            if (i.itemId !== sug.itemId) return i;
+            // Tornar preferencial: a antiga continua no leque, só deixa de ser a preferencial
+            if (sug.tipo === "tornar_preferencial") {
+              return {
+                ...i,
+                aceitas: i.aceitas.includes(sug.para) ? i.aceitas : [...i.aceitas, sug.para],
+                preferenciais: [sug.para, ...i.preferenciais.filter((x) => x !== sug.para && x !== sug.de)],
+              };
+            }
+            return { ...i, aceitas: troca(i.aceitas), preferenciais: sug.de && i.preferenciais.includes(sug.de) ? troca(i.preferenciais) : i.preferenciais };
+          })
         : [...padrao.itens, { itemId: sug.itemId, qtdTipica: 1, aceitas: [sug.para], preferenciais: [sug.para] }];
+      // Padrão ainda não aprovado: a sugestão entra no rascunho, mas só a comissão aprova (sem nova versão)
+      if (padrao.status !== "vigente") {
+        return { ...e, padroes: { ...e.padroes, [a.procedimentoId]: { ...padrao, itens, sugestoes, status: "em_ajuste" } } };
+      }
       const versao = padrao.versao + 1;
       const novo: Padrao = {
         ...padrao,
@@ -131,7 +143,7 @@ interface DominioCtx {
   mudarStatus: (id: string, status: StatusPedido) => void;
   pedirAjuste: (id: string, motivo: string, itemId?: string) => void;
   resolverAjustes: (id: string) => void;
-  aceitarForaPadrao: (id: string, motivo: string) => void;
+  aceitarForaPadrao: (id: string, motivo: string, cobre?: string[]) => void;
   salvarPadrao: (padrao: Padrao) => void;
   aceitarSugestao: (procedimentoId: string, sugestaoId: string) => void;
   recusarSugestao: (procedimentoId: string, sugestaoId: string) => void;
@@ -166,7 +178,7 @@ export function DominioProvider({ children }: { children: ReactNode }) {
     mudarStatus: (id, status) => dispatch({ tipo: "atualizar", id, parcial: { status } }),
     pedirAjuste: (id, motivo, itemId) => dispatch({ tipo: "pedirAjuste", id, motivo, itemId }),
     resolverAjustes: (id) => dispatch({ tipo: "resolverAjustes", id }),
-    aceitarForaPadrao: (id, motivo) => dispatch({ tipo: "aceitarForaPadrao", id, motivo }),
+    aceitarForaPadrao: (id, motivo, cobre) => dispatch({ tipo: "aceitarForaPadrao", id, motivo, cobre }),
     salvarPadrao: (padrao) => dispatch({ tipo: "salvarPadrao", padrao }),
     aceitarSugestao: (procedimentoId, sugestaoId) => dispatch({ tipo: "sugestao", procedimentoId, sugestaoId, aceitar: true }),
     recusarSugestao: (procedimentoId, sugestaoId) => dispatch({ tipo: "sugestao", procedimentoId, sugestaoId, aceitar: false }),

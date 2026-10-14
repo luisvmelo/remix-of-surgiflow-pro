@@ -157,7 +157,7 @@ export function sugestaoBenchmark(d: Dominio, origemId: string, procedimentoId: 
     id: `s-bench-${origemId}-${procedimentoId}-${itemId}-${marcaId}`,
     titulo: `Benchmark ${origem.nome}: ${marca(marcaId)?.fabricante} como preferencial em ${item.nome.toLowerCase()}`,
     motivo: `No ${origem.nome} este procedimento tem ${b?.dentroPadraoPct ?? "—"}% no padrão, glosa de ${b?.glosaPct ?? "—"}% e libera em ${b?.liberacaoDias ?? "—"} dias. Marca: libera em ${marca(marcaId)?.liberacaoDias} dias, glosa ${marca(marcaId)?.glosaPct}%.`,
-    tipo: "trocar_marca",
+    tipo: "tornar_preferencial",
     itemId,
     de,
     para: marcaId,

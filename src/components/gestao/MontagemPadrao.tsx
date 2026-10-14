@@ -104,12 +104,13 @@ const MontagemPadrao = ({ procedimentoId, onVoltar }: Props) => {
   };
 
   const salvarAjustes = () => {
-    if (salvo.status === "vigente") {
-      const versao = salvo.versao + 1;
-      salvarPadrao({ ...rascunho, versao, aprovadoEm: hoje(), historico: [...rascunho.historico, { versao, data: hoje(), mudanca: "Ajuste da comissão" }] });
-    } else {
-      salvarPadrao({ ...rascunho, status: "em_ajuste" });
-    }
+    const versao = salvo.versao + 1;
+    const novo: Padrao = salvo.status === "vigente"
+      ? { ...rascunho, versao, aprovadoEm: hoje(), historico: [...rascunho.historico, { versao, data: hoje(), mudanca: "Ajuste da comissão" }] }
+      : { ...rascunho, status: "em_ajuste" };
+    salvarPadrao(novo);
+    // O rascunho passa a ser o que foi salvo: evita salvar de novo por cima e perder a versão
+    setRascunho(novo);
   };
 
   const aprovar = () => {
