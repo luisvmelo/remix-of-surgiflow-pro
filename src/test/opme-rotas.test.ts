@@ -1,12 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { OPME_CAMINHOS } from "@opme/rotas";
 
-const ROTAS_SURGIFLOW = ["/", "/select-doctor", "/home", "/pedido", "/medico", "/hospital"];
+const ROTAS_SURGIFLOW = ["/", "/select-doctor", "/home", "/pedido", "/medico", "/hospital", "/consultor"];
 
 describe("rotas do OPME.AI no app unificado", () => {
   it("expõe as telas de Compras e Gerente com os caminhos originais", () => {
     expect(OPME_CAMINHOS).toEqual(
-      expect.arrayContaining(["/dashboard", "/bi/procedimento/:pacienteId", "/paciente/:id", "/acompanhamento"]),
+      expect.arrayContaining(["/dashboard", "/bi/procedimento/:pacienteId", "/paciente/:id", "/acompanhamento", "/revisao", "/revisao/:id"]),
     );
   });
 

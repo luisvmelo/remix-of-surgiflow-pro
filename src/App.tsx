@@ -12,6 +12,7 @@ import PedidoPage from "./pages/PedidoPage";
 import MedicoHome from "./pages/medico/MedicoHome";
 import MedicoPedido from "./pages/medico/MedicoPedido";
 import HospitalHome from "./pages/hospital/HospitalHome";
+import ConsultorHome from "@/consultor/ConsultorHome";
 import NotFound from "./pages/NotFound";
 import TrocarPerfilButton from "@/components/TrocarPerfilButton";
 import OpmeShell from "@/opme/OpmeShell";
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/medico" element={<MedicoHome />} />
             <Route path="/medico/pedido/:id" element={<MedicoPedido />} />
             <Route path="/hospital" element={<HospitalHome />} />
+            <Route path="/consultor" element={<ConsultorHome />} />
             <Route element={<OpmeShell />}>
               {OPME_ROTAS.map((r) => (
                 <Route key={r.path} path={r.path} element={r.element} />

@@ -40,4 +40,14 @@ describe("botão de trocar perfil", () => {
     fireEvent.click(screen.getByRole("button", { name: "Trocar perfil" }));
     expect(screen.getByText("tela de perfis")).toBeInTheDocument();
   });
+
+  it("nas telas do OPME fica ao lado da barra lateral, sem cobrir o botão Sair", () => {
+    renderEm("/revisao/p3");
+    expect(screen.getByRole("button", { name: "Trocar perfil" }).className).toContain("left-[232px]");
+  });
+
+  it("fora do OPME fica no canto", () => {
+    renderEm("/hospital");
+    expect(screen.getByRole("button", { name: "Trocar perfil" }).className).toContain("left-3");
+  });
 });

@@ -4,11 +4,12 @@ import { useSurgical } from "@/contexts/SurgicalContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, Mail, Activity, Stethoscope, ClipboardList, Building2, ShoppingCart, UserCheck, type LucideIcon } from "lucide-react";
+import { Lock, Mail, Activity, Stethoscope, ClipboardList, Building2, ShoppingCart, UserCheck, Briefcase, type LucideIcon } from "lucide-react";
 import { PERFIS, rotaInicial, type Perfil } from "@/lib/perfis";
 
 const ICONE: Record<Perfil, LucideIcon> = {
   gestao: Building2,
+  consultor: Briefcase,
   medico: Stethoscope,
   secretaria: ClipboardList,
   compras: ShoppingCart,

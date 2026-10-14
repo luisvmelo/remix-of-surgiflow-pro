@@ -1,4 +1,4 @@
-import { ClipboardList, LogOut, UserCheck, type LucideIcon } from "lucide-react";
+import { ClipboardCheck, ClipboardList, LogOut, UserCheck, type LucideIcon } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@opme/contexts/AuthContext";
 import { cn } from "@opme/lib/utils";
@@ -24,7 +24,10 @@ const MODULOS: Modulo[] = [
   {
     nome: "Operacional",
     area: "Compras",
-    itens: [{ path: "/dashboard", label: "Lista de compras", icon: ClipboardList, inclui: ["/bi/procedimento", "/paciente"] }],
+    itens: [
+      { path: "/revisao", label: "Revisão de pedidos", icon: ClipboardCheck },
+      { path: "/dashboard", label: "Lista de compras", icon: ClipboardList, inclui: ["/bi/procedimento", "/paciente"] },
+    ],
   },
   {
     nome: "Tático",

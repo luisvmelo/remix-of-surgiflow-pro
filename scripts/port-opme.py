@@ -87,7 +87,19 @@ def ajustes():
     # e as Configurações de compras passaram para a aba Configuração da Gestão
     substituir("components/Sidebar.tsx",
                'import { BarChart3, ClipboardList, Lightbulb, LogOut, Settings, UserCheck, type LucideIcon } from "lucide-react";',
-               'import { ClipboardList, LogOut, UserCheck, type LucideIcon } from "lucide-react";')
+               'import { ClipboardCheck, ClipboardList, LogOut, UserCheck, type LucideIcon } from "lucide-react";')
+    # Fila de revisão dos pedidos estruturados que chegam do wizard (src/compras)
+    substituir("components/Sidebar.tsx",
+               'itens: [{ path: "/dashboard", label: "Lista de compras", icon: ClipboardList, inclui: ["/bi/procedimento", "/paciente"] }],',
+               'itens: [\n      { path: "/revisao", label: "Revisão de pedidos", icon: ClipboardCheck },\n'
+               '      { path: "/dashboard", label: "Lista de compras", icon: ClipboardList, inclui: ["/bi/procedimento", "/paciente"] },\n    ],')
+    # Aba Médico: preferências em primeiro lugar; estatísticas e ranking viram opcionais (desligados)
+    substituir("config/produto.ts", "  rankingFornecedorMedico: true,\n  estatisticasMedico: true,",
+               "  rankingFornecedorMedico: false,\n  estatisticasMedico: false,")
+    substituir("pages/BIProcedimento.tsx",
+               "const mostrarAbaMedico = config.estatisticasMedico || config.rankingFornecedorMedico;",
+               "const mostrarAbaMedico = true;")
+    substituir("pages/BIProcedimento.tsx", "Ranking de fornecedores (médico)", "Fornecedores mais usados pelo médico")
     substituir("components/Sidebar.tsx",
                'import { cn } from "@opme/lib/utils";',
                'import { cn } from "@opme/lib/utils";\nimport { useEmbutido } from "@opme/embutido";')

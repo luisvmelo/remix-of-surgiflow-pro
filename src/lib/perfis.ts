@@ -1,7 +1,8 @@
-export type Perfil = "gestao" | "medico" | "secretaria" | "compras" | "gerente_compras";
+export type Perfil = "gestao" | "consultor" | "medico" | "secretaria" | "compras" | "gerente_compras";
 
 export const PERFIS: { id: Perfil; label: string; descricao: string }[] = [
   { id: "gestao", label: "Gestão", descricao: "Diretoria e consultoria do hospital" },
+  { id: "consultor", label: "Consultor", descricao: "Carteira de hospitais e benchmark" },
   { id: "medico", label: "Médico", descricao: "Monta e valida pedidos" },
   { id: "secretaria", label: "Secretária", descricao: "Monta pedidos para o médico" },
   { id: "compras", label: "Compras", descricao: "Revisa pedidos e otimiza a compra" },
@@ -10,9 +11,10 @@ export const PERFIS: { id: Perfil; label: string; descricao: string }[] = [
 
 const ROTA_INICIAL: Record<Perfil, string> = {
   gestao: "/hospital",
+  consultor: "/consultor",
   medico: "/medico",
   secretaria: "/home",
-  compras: "/dashboard",
+  compras: "/revisao",
   gerente_compras: "/acompanhamento",
 };
 

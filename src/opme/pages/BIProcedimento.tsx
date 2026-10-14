@@ -152,7 +152,7 @@ const BIProcedimento = () => {
   const resumo = resumoCirurgia(cirurgia, escolhas);
   const analise = analisarCirurgia(cirurgia, escolhas, estado);
   const avaliacao = avaliarPedido(cirurgia, escolhas, estado);
-  const mostrarAbaMedico = config.estatisticasMedico || config.rankingFornecedorMedico;
+  const mostrarAbaMedico = true;
   const medico = MEDICOS.find((m) => m.cd === paciente.cdPrestador);
   const abaAtiva = aba === "medico" && !mostrarAbaMedico ? "previsao" : aba;
 
@@ -647,7 +647,7 @@ const BIProcedimento = () => {
                   {config.rankingFornecedorMedico && (
                   <div className="bg-surface rounded-lg shadow-elevation-1">
                     <div className="p-4 border-b border-cinza-200">
-                      <h3 className="section-sub uppercase tracking-wide">Ranking de fornecedores (médico)</h3>
+                      <h3 className="section-sub uppercase tracking-wide">Fornecedores mais usados pelo médico</h3>
                     </div>
                     <div className="p-4">
                       <div className="flex items-center justify-between mb-3 pb-2 border-b border-cinza-200">

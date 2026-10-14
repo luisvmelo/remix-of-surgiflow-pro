@@ -13,8 +13,8 @@ export const CONFIG_STORAGE_KEY = "config_produto";
 export const REDE_ID = "rede";
 
 export const CONFIG_PADRAO: ConfigProduto = {
-  rankingFornecedorMedico: true,
-  estatisticasMedico: true,
+  rankingFornecedorMedico: false,
+  estatisticasMedico: false,
   equivalenciaTecnica: true,
   conveniosExcluidos: ["SUS"],
 };

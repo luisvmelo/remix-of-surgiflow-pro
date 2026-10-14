@@ -10,7 +10,7 @@ const renderLogin = () =>
       <HashRouter>
         <Routes>
           <Route path="/" element={<Login />} />
-          <Route path="/dashboard" element={<p>tela de compras</p>} />
+          <Route path="/revisao" element={<p>tela de compras</p>} />
         </Routes>
       </HashRouter>
     </SurgicalProvider>,
@@ -20,12 +20,12 @@ describe("login por perfil", () => {
   it("mostra um botão por perfil", () => {
     window.location.hash = "#/";
     renderLogin();
-    for (const nome of ["Gestão", "Médico", "Secretária", "Compras", "Gerente de compras"]) {
+    for (const nome of ["Gestão", "Consultor", "Médico", "Secretária", "Compras", "Gerente de compras"]) {
       expect(screen.getByRole("button", { name: new RegExp(`^${nome}`, "i") })).toBeInTheDocument();
     }
   });
 
-  it("entrar como Compras leva para a lista de compras", () => {
+  it("entrar como Compras leva para a revisão de pedidos", () => {
     window.location.hash = "#/";
     renderLogin();
     fireEvent.click(screen.getByRole("button", { name: /^Compras/i }));
