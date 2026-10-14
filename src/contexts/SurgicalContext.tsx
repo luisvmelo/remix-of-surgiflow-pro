@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { WizardState, WizardStep, mockDocuments, SavedRequest, mockRecommendedOPMEs } from "@/lib/mockData";
 import { HospitalConfig, defaultHospitalConfig } from "@/lib/remuneracao";
+import type { Perfil } from "@/lib/perfis";
 
 const CONFIG_KEY = "solicitacirurg.hospitalConfig";
 
@@ -27,6 +28,8 @@ interface SurgicalContextType {
   resetWizard: () => void;
   hospitalConfig: HospitalConfig;
   setHospitalConfig: (config: HospitalConfig) => void;
+  perfil: Perfil | null;
+  setPerfil: (perfil: Perfil | null) => void;
 }
 
 const SurgicalContext = createContext<SurgicalContextType | null>(null);
@@ -55,6 +58,7 @@ const initialState: WizardState = {
 export function SurgicalProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<WizardState>(initialState);
   const [isLoggedIn, setLoggedIn] = useState(false);
+  const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [savedRequests, setSavedRequests] = useState<SavedRequest[]>([]);
   const [hospitalConfig, setHospitalConfig] = useState<HospitalConfig>(loadConfig);
 
@@ -140,7 +144,7 @@ export function SurgicalProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <SurgicalContext.Provider value={{ state, setStep, updateState, isLoggedIn, setLoggedIn, stepStatus, savedRequests, saveRequest, resetWizard, hospitalConfig, setHospitalConfig }}>
+    <SurgicalContext.Provider value={{ state, setStep, updateState, isLoggedIn, setLoggedIn, stepStatus, savedRequests, saveRequest, resetWizard, hospitalConfig, setHospitalConfig, perfil, setPerfil }}>
       {children}
     </SurgicalContext.Provider>
   );

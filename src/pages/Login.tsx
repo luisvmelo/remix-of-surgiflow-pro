@@ -4,28 +4,33 @@ import { useSurgical } from "@/contexts/SurgicalContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, Mail, Activity, Stethoscope, ClipboardList, Building2 } from "lucide-react";
+import { Lock, Mail, Activity, Stethoscope, ClipboardList, Building2, ShoppingCart, UserCheck, type LucideIcon } from "lucide-react";
+import { PERFIS, rotaInicial, type Perfil } from "@/lib/perfis";
+
+const ICONE: Record<Perfil, LucideIcon> = {
+  gestao: Building2,
+  medico: Stethoscope,
+  secretaria: ClipboardList,
+  compras: ShoppingCart,
+  gerente_compras: UserCheck,
+};
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { setLoggedIn, updateState } = useSurgical();
+  const { setLoggedIn, updateState, setPerfil } = useSurgical();
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent, role: "secretary" | "doctor" | "hospital") => {
+  const handleLogin = (e: React.FormEvent, perfil: Perfil) => {
     e.preventDefault();
     setLoggedIn(true);
-    if (role === "doctor") {
-      // Set a mock doctor directly
+    setPerfil(perfil);
+    if (perfil === "medico") {
       updateState({
         doctor: { id: "1", name: "Dr. Ricardo Almeida", specialty: "Ortopedia", crm: "CRM/SP 12345", active: true },
       });
-      navigate("/medico");
-    } else if (role === "hospital") {
-      navigate("/hospital");
-    } else {
-      navigate("/home");
     }
+    navigate(rotaInicial(perfil));
   };
 
   return (
@@ -113,31 +118,26 @@ const Login = () => {
 
             <div className="space-y-3 pt-2">
               <p className="text-xs text-muted-foreground text-center">Entrar como:</p>
-              <div className="grid grid-cols-2 gap-3">
-                <Button
-                  type="button"
-                  onClick={(e) => handleLogin(e, "secretary")}
-                  className="h-12 text-sm font-semibold"
-                >
-                  <ClipboardList className="w-4 h-4 mr-2" /> Secretária
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={(e) => handleLogin(e, "doctor")}
-                  className="h-12 text-sm font-semibold border-primary/30 hover:bg-primary/5"
-                >
-                  <Stethoscope className="w-4 h-4 mr-2" /> Médico
-                </Button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {PERFIS.map((p) => {
+                  const Icone = ICONE[p.id];
+                  return (
+                    <Button
+                      key={p.id}
+                      type="button"
+                      variant={p.id === "gestao" ? "default" : "outline"}
+                      onClick={(e) => handleLogin(e, p.id)}
+                      className="h-auto py-3 justify-start text-left"
+                    >
+                      <Icone className="w-4 h-4 mr-2 shrink-0" />
+                      <span className="flex flex-col">
+                        <span className="text-sm font-semibold">{p.label}</span>
+                        <span className="text-[11px] font-normal opacity-70">{p.descricao}</span>
+                      </span>
+                    </Button>
+                  );
+                })}
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={(e) => handleLogin(e, "hospital")}
-                className="w-full h-12 text-sm font-semibold border-info/30 hover:bg-info/5"
-              >
-                <Building2 className="w-4 h-4 mr-2" /> Hospital
-              </Button>
             </div>
           </form>
         </div>
