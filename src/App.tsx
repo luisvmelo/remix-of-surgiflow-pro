@@ -14,6 +14,7 @@ import DoctorGuiaDetail from "./pages/doctor/DoctorGuiaDetail";
 import DoctorGuiaEdit from "./pages/doctor/DoctorGuiaEdit";
 import HospitalHome from "./pages/hospital/HospitalHome";
 import NotFound from "./pages/NotFound";
+import TrocarPerfilButton from "@/components/TrocarPerfilButton";
 import OpmeShell from "@/opme/OpmeShell";
 import { OPME_ROTAS } from "@/opme/rotas";
 
@@ -26,6 +27,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <HashRouter>
+          <TrocarPerfilButton />
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/select-doctor" element={<SelectDoctor />} />
