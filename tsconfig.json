@@ -5,9 +5,8 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"],
+      "@opme/*": ["./src/opme/*"]
     },
     "skipLibCheck": true,
     "strictNullChecks": false

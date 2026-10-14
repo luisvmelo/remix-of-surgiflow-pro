@@ -44,6 +44,7 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@opme": path.resolve(__dirname, "./src/opme"),
     },
   },
 }));
