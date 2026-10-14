@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  Avaliacao, CondicaoAvaliada, CondicaoTipo, ContratoOperadora, Dominio, ItemPedido, Marca, Padrao, Pedido,
+  Avaliacao, CondicaoAvaliada, CondicaoTipo, ContratoOperadora, Dominio, ItemPadrao, ItemPedido, Marca, Padrao, Pedido, SugestaoAlteracao,
 } from "./tipos";
 
 const DIAS_EXTRA_FORA_PADRAO = 7;
@@ -239,4 +239,26 @@ export function desviosCobertos(p: Pedido, a: Avaliacao): boolean {
   if (!p.aceitoForaPadrao) return false;
   const cobre = p.aceitoForaPadrao.cobre;
   return !cobre || desvios.every((d) => cobre.includes(d));
+}
+
+/** Itens do padrão depois de aceitar uma sugestão de alteração (usado pelo store e pela prévia da comissão). */
+export function aplicarSugestao(padrao: Padrao, sug: SugestaoAlteracao): ItemPadrao[] {
+  const troca = (lista: string[]) => {
+    const sem = sug.de ? lista.filter((x) => x !== sug.de) : lista;
+    return sem.includes(sug.para) ? sem : [...sem, sug.para];
+  };
+  return padrao.itens.some((i) => i.itemId === sug.itemId)
+    ? padrao.itens.map((i) => {
+        if (i.itemId !== sug.itemId) return i;
+        // Tornar preferencial: a antiga continua no leque, só deixa de ser a preferencial
+        if (sug.tipo === "tornar_preferencial") {
+          return {
+            ...i,
+            aceitas: i.aceitas.includes(sug.para) ? i.aceitas : [...i.aceitas, sug.para],
+            preferenciais: [sug.para, ...i.preferenciais.filter((x) => x !== sug.para && x !== sug.de)],
+          };
+        }
+        return { ...i, aceitas: troca(i.aceitas), preferenciais: sug.de && i.preferenciais.includes(sug.de) ? troca(i.preferenciais) : i.preferenciais };
+      })
+    : [...padrao.itens, { itemId: sug.itemId, qtdTipica: 1, aceitas: [sug.para], preferenciais: [sug.para] }];
 }

@@ -58,7 +58,12 @@ export function gerarHistorico(d: Dominio): PedidoHistorico[] {
       const operadoraId = sortearPeso(r, PESO_OPERADORA);
       const plano = sortearPeso(r, PESO_PLANO);
       const sugerido = pedidoSugerido(procedimentoId, operadoraId, d);
-      let itens = [...sugerido.itens];
+      // Dentro do leque os médicos também variam a marca (35% das vezes), sem sair do padrão
+      let itens = sugerido.itens.map((i) => {
+        const ip = padrao.itens.find((x) => x.itemId === i.itemId);
+        const outras = d.marcas.filter((m) => ip?.aceitas.includes(m.id) && m.homologadaEm.includes(operadoraId) && m.id !== i.marcaId);
+        return outras.length && r() < 0.35 ? { ...i, marcaId: sortear(r, outras).id } : i;
+      });
       let codigos = [...sugerido.codigos];
 
       if (r() < chanceFora && itens.length > 0) {

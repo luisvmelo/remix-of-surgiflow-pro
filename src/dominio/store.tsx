@@ -5,9 +5,11 @@
 
 import { createContext, useContext, useEffect, useMemo, useReducer, type ReactNode } from "react";
 import { DOMINIO_SEMENTE, PEDIDOS_SEMENTE } from "./dados";
+import { aplicarSugestao } from "./motor";
 import type { ConfigHospital, ContratoMedico, ContratoOperadora, Dominio, Padrao, Pedido, StatusPedido } from "./tipos";
 
-export const CHAVE_STORAGE = "solicitacirurg.dominio.v1";
+// v2: protocolos institucionais nos pré-modelos (dados salvos da v1 ficam para trás)
+export const CHAVE_STORAGE = "solicitacirurg.dominio.v2";
 
 interface Estado {
   config: ConfigHospital;
@@ -82,24 +84,7 @@ function reducer(e: Estado, a: Acao): Estado {
       if (!padrao || !sug) return e;
       const sugestoes = padrao.sugestoes.filter((s) => s.id !== a.sugestaoId);
       if (!a.aceitar) return { ...e, padroes: { ...e.padroes, [a.procedimentoId]: { ...padrao, sugestoes } } };
-      const troca = (lista: string[]) => {
-        const sem = sug.de ? lista.filter((x) => x !== sug.de) : lista;
-        return sem.includes(sug.para) ? sem : [...sem, sug.para];
-      };
-      const itens = padrao.itens.some((i) => i.itemId === sug.itemId)
-        ? padrao.itens.map((i) => {
-            if (i.itemId !== sug.itemId) return i;
-            // Tornar preferencial: a antiga continua no leque, só deixa de ser a preferencial
-            if (sug.tipo === "tornar_preferencial") {
-              return {
-                ...i,
-                aceitas: i.aceitas.includes(sug.para) ? i.aceitas : [...i.aceitas, sug.para],
-                preferenciais: [sug.para, ...i.preferenciais.filter((x) => x !== sug.para && x !== sug.de)],
-              };
-            }
-            return { ...i, aceitas: troca(i.aceitas), preferenciais: sug.de && i.preferenciais.includes(sug.de) ? troca(i.preferenciais) : i.preferenciais };
-          })
-        : [...padrao.itens, { itemId: sug.itemId, qtdTipica: 1, aceitas: [sug.para], preferenciais: [sug.para] }];
+      const itens = aplicarSugestao(padrao, sug);
       // Padrão ainda não aprovado: a sugestão entra no rascunho, mas só a comissão aprova (sem nova versão)
       if (padrao.status !== "vigente") {
         return { ...e, padroes: { ...e.padroes, [a.procedimentoId]: { ...padrao, itens, sugestoes, status: "em_ajuste" } } };

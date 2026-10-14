@@ -181,8 +181,51 @@ export const MARCAS: Marca[] = ([
 const documentosPadrao = ["Relatório médico", "Exames de imagem", "Termo de consentimento"];
 
 /** Pré-modelo da IA: as marcas sem glosa alta entram no leque; a mais rápida de liberar é a preferencial. */
+/**
+ * Protocolos clínicos que o hospital já tem escritos (lidos do sistema do hospital).
+ * O pré-modelo da IA parte deles; a comissão revisa e ajusta.
+ */
+export const PROTOCOLOS_INSTITUCIONAIS: Record<string, { criterios: string[]; documentos: string[]; fonte: string }> = {
+  lca: {
+    criterios: ["Ruptura do LCA confirmada por RM", "Instabilidade funcional do joelho", "Paciente ativo, sem artrose avançada"],
+    documentos: ["Relatório médico", "RM de joelho", "Termo de consentimento"],
+    fonte: "Protocolo institucional de joelho (RHP, 2025)",
+  },
+  ombro: {
+    criterios: ["Lesão do manguito rotador confirmada por RM ou US", "Dor ou perda de força por mais de 3 meses", "Falha da fisioterapia"],
+    documentos: ["Relatório médico", "RM de ombro", "Termo de consentimento"],
+    fonte: "Protocolo institucional de ombro (RHP, 2025)",
+  },
+  quadril: {
+    criterios: ["Artrose ou necrose da cabeça femoral com limitação funcional", "Falha do tratamento clínico", "Avaliação de risco cirúrgico"],
+    documentos: ["Relatório médico", "Radiografia de bacia", "Risco cirúrgico", "Termo de consentimento"],
+    fonte: "Protocolo institucional de artroplastia (RHP, 2024)",
+  },
+  plato: {
+    criterios: ["Fratura do platô tibial com desvio articular", "Tomografia para planejamento"],
+    documentos: ["Relatório médico", "Tomografia do joelho", "Termo de consentimento"],
+    fonte: "Protocolo institucional de trauma (RHP, 2025)",
+  },
+  tavi: {
+    criterios: ["Estenose aórtica grave sintomática", "Decisão do Heart Team", "Risco cirúrgico intermediário ou alto (STS)"],
+    documentos: ["Relatório médico", "Ecocardiograma", "Angiotomografia", "Ata do Heart Team", "Termo de consentimento"],
+    fonte: "Diretriz SBC de valvopatias · protocolo do Heart Team (RHP)",
+  },
+  marcapasso: {
+    criterios: ["Bradiarritmia sintomática ou BAV avançado documentado", "Causa reversível descartada"],
+    documentos: ["Relatório médico", "Eletrocardiograma", "Holter", "Termo de consentimento"],
+    fonte: "Diretriz SBC de dispositivos cardíacos · protocolo institucional",
+  },
+  histerectomia: {
+    criterios: ["Miomatose sintomática ou sangramento uterino refratário", "Falha ou contraindicação do tratamento clínico"],
+    documentos: ["Relatório médico", "Ultrassonografia transvaginal", "Termo de consentimento"],
+    fonte: "Protocolo institucional de ginecologia (RHP, 2025)",
+  },
+};
+
 function preModelo(procedimentoId: string, itens: [string, number][]): Padrao {
   const proc = PROCEDIMENTOS.find((p) => p.id === procedimentoId)!;
+  const institucional = PROTOCOLOS_INSTITUCIONAIS[procedimentoId];
   return {
     procedimentoId,
     versao: 0,
@@ -194,9 +237,9 @@ function preModelo(procedimentoId: string, itens: [string, number][]): Padrao {
     codigosRecomendados: [{ codigo: proc.codigo, descricao: proc.nome }],
     codigosAlerta: [],
     protocolo: {
-      criterios: ["Indicação conforme a diretriz da sociedade de especialidade"],
-      documentos: documentosPadrao,
-      fonte: "Pré-modelo gerado pela IA a partir do histórico do hospital",
+      criterios: institucional?.criterios ?? ["Indicação conforme a diretriz da sociedade de especialidade"],
+      documentos: institucional?.documentos ?? documentosPadrao,
+      fonte: institucional ? `${institucional.fonte} · lido pela IA, a revisar pela comissão` : "Pré-modelo gerado pela IA a partir do histórico do hospital",
       revisao: "",
     },
     complemento: { modo: "predefinido", valor: 1000 },

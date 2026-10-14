@@ -48,6 +48,7 @@ describe("Comissão", () => {
   it("marcar uma marca como preferencial a torna aceita também", () => {
     renderCom(<ComissaoTab />);
     fireEvent.click(screen.getByRole("button", { name: /Reconstrução de LCA/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Direcionar/ }));
     const item = dominio.padroes.lca.itens[0];
     const naoAceita = dominio.marcas.find((m) => m.itemId === item.itemId && !item.aceitas.includes(m.id))!;
     fireEvent.click(screen.getByRole("checkbox", { name: `Preferencial: ${naoAceita.fabricante} (${item.itemId})` }));

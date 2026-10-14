@@ -1,12 +1,16 @@
-import { useEffect, useState } from "react";
-import { ChevronRight, MessageSquarePlus } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ChevronRight, MessageSquarePlus, Sparkles } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDominio } from "@/dominio/store";
 import { LABEL_LINHA } from "@/gestao/analise";
+import { ganhoPossivel, statusRevisao } from "@/gestao/comissao";
+import { brl } from "@/components/pedido/formato";
+import { useRegistros } from "./useGestao";
 import type { LinhaCuidado } from "@/dominio/tipos";
 import MontagemPadrao from "./MontagemPadrao";
-import { StatusPadraoBadge } from "./StatusPadraoBadge";
+import { RevisaoBadge, StatusPadraoBadge } from "./StatusPadraoBadge";
 
 interface Props {
   /** Procedimento para abrir direto (vindo das pendências da Home) */
@@ -16,6 +20,8 @@ interface Props {
 const ComissaoTab = ({ abrir }: Props) => {
   const { dominio, aceitarSugestao, recusarSugestao } = useDominio();
   const [aberto, setAberto] = useState<string | null>(abrir ?? null);
+  const regs = useRegistros();
+  const ganhos = useMemo(() => Object.fromEntries(dominio.procedimentos.map((p) => [p.id, ganhoPossivel(regs, dominio, p.id)])), [regs, dominio]);
 
   useEffect(() => {
     if (abrir) setAberto(abrir);
@@ -30,11 +36,11 @@ const ComissaoTab = ({ abrir }: Props) => {
 
   return (
     <div className="space-y-5">
-      <div className="grid gap-3 grid-cols-3">
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
         {[
           { s: "vigente", t: "Padrões vigentes" },
           { s: "em_ajuste", t: "Em ajuste" },
-          { s: "pre_modelo", t: "Pré-modelos da IA para revisar" },
+          { s: "pre_modelo", t: "Sugestões da IA para revisar" },
         ].map(({ s, t }) => (
           <Card key={s}>
             <CardContent className="p-4">
@@ -43,6 +49,12 @@ const ComissaoTab = ({ abrir }: Props) => {
             </CardContent>
           </Card>
         ))}
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Revisões vencendo ou vencidas</p>
+            <p className="text-2xl font-bold tabular-nums">{padroes.filter((p) => ["vencendo", "vencida"].includes(statusRevisao(p))).length}</p>
+          </CardContent>
+        </Card>
       </div>
 
       {sugestoes.length > 0 && (
@@ -88,10 +100,16 @@ const ComissaoTab = ({ abrir }: Props) => {
                     <span className="block text-sm font-medium">{p.nome}</span>
                     <span className="block text-xs text-muted-foreground">
                       {p.volumeMes} cirurgias/mês · {padrao.itens.length} itens
-                      {padrao.sugestoes.length > 0 && ` · ${padrao.sugestoes.length} sugestão(ões)`}
+                      {ganhos[p.id] > 0 && <> · <span className="text-emerald-700 font-medium">Ganho possível {brl(ganhos[p.id])}/mês</span></>}
                     </span>
                   </span>
-                  <span className="flex items-center gap-2">
+                  <span className="flex flex-wrap items-center justify-end gap-2">
+                    {padrao.sugestoes.length > 0 && (
+                      <Badge variant="outline" className="border-amber-400 bg-amber-50 text-amber-800 gap-1">
+                        <Sparkles className="w-3 h-3" aria-hidden />Nova sugestão de alteração
+                      </Badge>
+                    )}
+                    <RevisaoBadge padrao={padrao} />
                     <StatusPadraoBadge padrao={padrao} />
                     <ChevronRight className="w-4 h-4 text-muted-foreground" aria-hidden />
                   </span>

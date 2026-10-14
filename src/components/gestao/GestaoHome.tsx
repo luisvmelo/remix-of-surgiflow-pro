@@ -14,6 +14,7 @@ import {
   type Dimensao, type LinhaRecorte,
 } from "@/gestao/analise";
 import { useRegistros } from "./useGestao";
+import { statusRevisao } from "@/gestao/comissao";
 
 const DIMENSOES: { id: Dimensao; label: string }[] = [
   { id: "cirurgia", label: "Cirurgia" },
@@ -83,6 +84,7 @@ const GestaoHome = ({ onAbrirPadrao, onIrPara }: Props) => {
     .sort((a, b) => b.volumeMes - a.volumeMes);
   const sugestoes = Object.values(dominio.padroes).flatMap((p) => p.sugestoes.map((s) => ({ ...s, procedimentoId: p.procedimentoId })));
   const emRevisao = pedidos.filter((p) => p.status === "esperando_confirmacao").length;
+  const revisoes = dominio.procedimentos.filter((p) => dominio.padroes[p.id] && ["vencendo", "vencida"].includes(statusRevisao(dominio.padroes[p.id])));
 
   const trocarDim = (d: Dimensao) => {
     setDim(d);
@@ -169,6 +171,19 @@ const GestaoHome = ({ onAbrirPadrao, onIrPara }: Props) => {
           <div>
             <p className="text-sm font-semibold">{emRevisao} pedidos esperando confirmação de Compras</p>
             <p className="text-sm text-muted-foreground mt-2">A revisão pedido a pedido é feita em Compras (OPME.AI). Aqui aparece só o volume.</p>
+            {revisoes.length > 0 && (
+              <>
+                <p className="text-sm font-semibold mt-4">{revisoes.length} padrão(ões) com revisão vencendo</p>
+                <ul className="mt-2 space-y-1">
+                  {revisoes.map((p) => (
+                    <li key={p.id} className="flex items-center justify-between gap-2 text-sm">
+                      <span className="truncate">{p.nome}</span>
+                      <Button variant="outline" size="sm" className="h-7 shrink-0" onClick={() => onAbrirPadrao?.(p.id)}>Revisar</Button>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>
