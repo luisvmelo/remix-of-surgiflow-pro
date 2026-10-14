@@ -26,6 +26,8 @@ export default {
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
+          300: "hsl(var(--secondary-300))",
+          400: "hsl(var(--secondary-400))",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -54,10 +56,59 @@ export default {
         warning: {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
+          100: "#FEF3C7",
+          200: "#FDE68A",
+          600: "hsl(var(--warning-600))",
+          700: "hsl(var(--warning-700))",
         },
         info: {
           DEFAULT: "hsl(var(--info))",
           foreground: "hsl(var(--info-foreground))",
+          400: "hsl(var(--info-400))",
+          500: "hsl(var(--info-500))",
+        },
+        // ---- Cores usadas pelas telas do OPME.AI (src/opme) ----
+        neutral: {
+          0: "hsl(var(--neutral-0))",
+          50: "hsl(var(--neutral-50))",
+          100: "hsl(var(--neutral-100))",
+          200: "hsl(var(--neutral-200))",
+          300: "hsl(var(--neutral-300))",
+          400: "hsl(var(--neutral-400))",
+          500: "hsl(var(--neutral-500))",
+          600: "hsl(var(--neutral-600))",
+          700: "hsl(var(--brand-neutral-700))",
+          900: "hsl(var(--brand-neutral-900))",
+        },
+        cinza: {
+          50: "#F7F8FA", 100: "#EEF0F3", 200: "#E1E4E9", 300: "#C9CED6", 400: "#9DA5B2",
+          500: "#7A8394", 600: "#636D80", 700: "#3F4757", 800: "#2A303B", 900: "#1B1F27",
+        },
+        surface: "#FFFFFF",
+        status: {
+          "success-bg": "#ECFDF5", "success-text": "#047857", "success-border": "#A7F3D0",
+          "warning-bg": "#FFFBEB", "warning-text": "#B45309",
+          "error-bg": "#FEF2F2", "error-text": "#B91C1C",
+        },
+        brand: {
+          azul: "#008DDF",
+          primary: "hsl(var(--brand-primary))",
+          100: "hsl(var(--brand-100))",
+          200: "hsl(var(--brand-200))",
+          300: "hsl(var(--brand-300))",
+          400: "hsl(var(--brand-400))",
+          500: "hsl(var(--brand-500))",
+          600: "hsl(var(--brand-primary-600))",
+          success: "hsl(var(--brand-success))",
+          warning: "hsl(var(--brand-warning))",
+          danger: "hsl(var(--brand-danger))",
+          info: "hsl(var(--brand-info))",
+          surface: "hsl(var(--brand-surface))",
+          "surface-2": "hsl(var(--brand-surface-2))",
+        },
+        danger: {
+          400: "hsl(var(--danger-400))",
+          500: "hsl(var(--danger-500))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
@@ -74,6 +125,15 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        pill: "var(--radius-pill)",
+      },
+      boxShadow: {
+        "elevation-1": "var(--shadow-elevation-1)",
+        "elevation-hover": "var(--shadow-elevation-hover)",
+        "elevation-modal": "var(--shadow-elevation-modal)",
+      },
+      screens: {
+        xs: "475px",
       },
       keyframes: {
         "accordion-down": {

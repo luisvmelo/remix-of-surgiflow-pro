@@ -79,8 +79,26 @@ def ajustes():
     )
 
 
+def gerar_css():
+    """Copia o index.css do OPME.AI confinado em .opme-theme."""
+    css = (ORIGEM / "index.css").read_text(encoding="utf-8")
+    # As diretivas do Tailwind já vêm do index.css do SurgiFlow
+    css = re.sub(r"^@tailwind\s+\w+;\s*$", "", css, flags=re.M)
+    # Fonte DM Sans só dentro do OPME
+    css = css.replace(
+        "* {\n  font-family: 'DM Sans'",
+        ".opme-theme, .opme-theme * {\n  font-family: 'DM Sans'",
+        1,
+    )
+    # Variáveis do tema só dentro do OPME
+    css = css.replace(":root {", ".opme-theme {")
+    css = re.sub(r"^(\s*)\.dark\s*\{", r"\1.dark .opme-theme {", css, flags=re.M)
+    (DESTINO / "opme.css").write_text(css, encoding="utf-8")
+
+
 if __name__ == "__main__":
     limpar_destino()
     copiar()
     ajustes()
+    gerar_css()
     print(f"OPME.AI copiado para {DESTINO}")

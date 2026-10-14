@@ -1,0 +1,897 @@
+/* ===== APLICAR DM SANS ===== */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+
+.opme-theme, .opme-theme * {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+
+
+
+/* Design System - Brand Tokens */
+
+@layer base {
+  .opme-theme {
+    /* Primary Brand */
+    --brand-primary: 217 100% 50%; /* #0057FF */
+    --brand-primary-600: 221 82% 48%; /* #1D4ED8 */
+    
+    /* Neutral Scale */
+    --brand-neutral-900: 215 25% 11%; /* #0F172A */
+    --brand-neutral-700: 215 14% 27%; /* #334155 */
+    --brand-neutral-200: 214 32% 91%; /* #E2E8F0 */
+    --brand-neutral-50: 210 40% 98%; /* #F8FAFC */
+    
+    /* Status Colors */
+    --brand-success: 142 71% 37%; /* #16A34A */
+    --brand-warning: 38 92% 50%; /* #F59E0B */
+    --brand-danger: 0 84% 60%; /* #EF4444 */
+    --brand-info: 199 89% 48%; /* #0EA5E9 */
+    
+    /* Surface */
+    --brand-surface: 0 0% 100%; /* #FFFFFF */
+    --brand-surface-2: 214 41% 97%; /* #F6F8FB */
+    
+    /* Legacy mappings for compatibility */
+    --neutral-0: var(--brand-surface);
+    --neutral-50: var(--brand-neutral-50);
+    --neutral-100: var(--brand-surface-2);
+    --neutral-200: var(--brand-neutral-200);
+    --neutral-300: 215 16% 47%; /* Mid-gray */
+    --neutral-400: 215 16% 37%; /* Dark-gray */
+    --neutral-500: var(--brand-neutral-700);
+    --neutral-600: var(--brand-neutral-900);
+    
+    --brand-100: 217 100% 95%; /* Light primary */
+    --brand-200: 217 100% 85%; /* Lighter primary */
+    --brand-300: 217 100% 60%; /* Mid primary */
+    --brand-400: var(--brand-primary);
+    --brand-500: var(--brand-primary-600);
+    
+    --secondary-300: var(--brand-success);
+    --secondary-400: 142 71% 30%;
+    
+    --warning-600: var(--brand-warning);
+    --warning-700: 38 92% 45%;
+    
+    --danger-400: var(--brand-danger);
+    --danger-500: 0 84% 50%;
+    
+    --info-400: var(--brand-info);
+    --info-500: 199 89% 38%;
+    
+    /* Shadcn Compatible Mappings */
+    --background: var(--neutral-0);
+    --foreground: var(--neutral-600);
+    
+    --card: var(--neutral-0);
+    --card-foreground: var(--neutral-600);
+    
+    --popover: var(--neutral-0);
+    --popover-foreground: var(--neutral-600);
+    
+    --primary: var(--brand-400);
+    --primary-foreground: var(--neutral-0);
+    
+    --secondary: var(--secondary-300);
+    --secondary-foreground: var(--neutral-0);
+    
+    --muted: var(--neutral-100);
+    --muted-foreground: var(--neutral-400);
+    
+    --accent: var(--brand-100);
+    --accent-foreground: var(--brand-500);
+    
+    --destructive: var(--danger-400);
+    --destructive-foreground: var(--neutral-0);
+    
+    --border: var(--neutral-200);
+    --input: var(--neutral-200);
+    --ring: var(--brand-300);
+    
+    /* Layout Tokens */
+    --radius: 0.5rem; /* 8px base */
+    --radius-pill: 1rem; /* 16px for pills */
+    
+    /* Shadows */
+    --shadow-elevation-1: 0 1px 3px rgba(15, 23, 42, 0.06);
+    --shadow-elevation-hover: 0 4px 12px rgba(15, 23, 42, 0.10);
+    --shadow-elevation-modal: 0 10px 24px rgba(15, 23, 42, 0.15);
+    --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.08);
+    
+    /* Focus Ring */
+    --focus-ring: 0 0 0 3px rgba(29, 78, 216, 0.25);
+    
+    /* Spacing Scale (8px base) */
+    --spacing-1: 4px;
+    --spacing-2: 8px;
+    --spacing-3: 12px;
+    --spacing-4: 16px;
+    --spacing-6: 24px;
+    --spacing-8: 32px;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Typography Scale - DM Sans */
+  h1 {
+    @apply text-[24px] leading-[32px] font-bold;
+  }
+  
+  h2 {
+    @apply text-[20px] leading-[28px] font-bold;
+  }
+  
+  h3 {
+    @apply text-[16px] leading-[24px] font-bold;
+  }
+  
+  body, p, .text-body {
+    @apply text-[14px] leading-[20px] font-normal;
+  }
+  
+  .text-caption {
+    @apply text-[12px] leading-[16px] font-normal;
+  }
+  
+  /* Utility Typography Classes */
+  .text-d1 {
+    @apply text-[24px] leading-[32px];
+  }
+  
+  .text-d2 {
+    @apply text-[20px] leading-[28px];
+  }
+  
+  .text-d3 {
+    @apply text-[16px] leading-[24px];
+  }
+
+  /* Usados no card e na topbar; não estavam definidos */
+  .text-d4 {
+    @apply text-[22px] leading-[28px];
+  }
+
+  .text-d5 {
+    @apply text-[17px] leading-[24px];
+  }
+
+  .text-paragraph {
+    @apply text-[14px] leading-[20px];
+  }
+  
+  .text-copy {
+    @apply text-[12px] leading-[16px];
+  }
+  
+  /* Typography Weight Variants */
+  label, .label, legend {
+    @apply font-medium; /* 500 */
+  }
+}
+
+@layer utilities {
+  /* KPI Cards - Big Numbers */
+  .kpi-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    border-radius: 12px;
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-neutral-200);
+    aspect-ratio: 1 / 1;
+    min-width: 160px;
+    box-shadow: var(--shadow-elevation-1);
+    transition: all 180ms ease-out;
+  }
+  
+  .kpi-card:hover {
+    box-shadow: var(--shadow-elevation-hover);
+  }
+  
+  /* Barra lateral de severidade */
+  .kpi-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 4px;
+    border-radius: 12px 0 0 12px;
+    background: var(--brand-neutral-200);
+    pointer-events: none;
+  }
+  
+  .kpi-card.kpi--success::before {
+    background: var(--brand-success);
+  }
+  
+  .kpi-card.kpi--warning::before {
+    background: var(--brand-warning);
+  }
+  
+  .kpi-card.kpi--danger::before {
+    background: var(--brand-danger);
+  }
+  
+  .kpi-card.kpi--info::before {
+    background: var(--brand-info);
+  }
+  
+  /* Elementos do KPI */
+  .kpi-label {
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    color: var(--brand-neutral-700);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  
+  .kpi-value {
+    font-size: 36px;
+    line-height: 42px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--brand-neutral-900);
+  }
+  
+  .kpi-note {
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    color: var(--brand-neutral-700);
+  }
+  
+  .kpi-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 600;
+  }
+
+  /* Card Expansion Animation */
+  .card-expanded-content {
+    animation: expand-content 200ms ease-out;
+    transform-origin: top;
+  }
+  
+  @keyframes expand-content {
+    from {
+      opacity: 0;
+      transform: scaleY(0.95);
+      max-height: 0;
+    }
+    to {
+      opacity: 1;
+      transform: scaleY(1);
+      max-height: 1000px;
+    }
+  }
+  
+  /* Smooth transitions */
+  .transition-smooth {
+    transition: all 180ms ease-out;
+  }
+  
+  /* Rounded pill for badges */
+  .rounded-pill {
+    border-radius: var(--radius-pill);
+  }
+  
+  /* Focus visible states */
+  .focus-ring {
+    @apply focus-visible:outline-none;
+    box-shadow: var(--focus-ring);
+  }
+  
+  .focus-visible\:ring-focus:focus-visible {
+    box-shadow: var(--focus-ring);
+  }
+  
+  /* Button utilities */
+  .hover\:brightness-96:hover {
+    filter: brightness(0.96);
+  }
+  
+  /* Custom scrollbar */
+  .page-scroll::-webkit-scrollbar-button {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+  
+  .page-scroll::-webkit-scrollbar {
+    width: 10px;
+  }
+  
+  .page-scroll::-webkit-scrollbar-thumb {
+    background: var(--brand-neutral-200);
+    border-radius: 8px;
+  }
+  
+  .page-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .page-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--brand-neutral-200) transparent;
+  }
+  
+  /* Status Chips */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    height: 26px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    gap: 6px;
+  }
+  
+  .chip--success {
+    background: color-mix(in srgb, var(--brand-success) 12%, #fff);
+    color: var(--brand-success);
+  }
+  
+  .chip--warning {
+    background: color-mix(in srgb, var(--brand-warning) 12%, #fff);
+    color: var(--brand-warning);
+  }
+  
+  .chip--danger {
+    background: color-mix(in srgb, var(--brand-danger) 12%, #fff);
+    color: var(--brand-danger);
+  }
+  
+  .chip--info {
+    background: color-mix(in srgb, var(--brand-info) 12%, #fff);
+    color: var(--brand-info);
+  }
+  
+  /* Table Styles */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--brand-neutral-200);
+  }
+  
+  .data-table thead {
+    background: var(--brand-surface-2);
+  }
+  
+  .data-table th {
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 600;
+    color: var(--brand-neutral-700);
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--brand-neutral-200);
+  }
+  
+  .data-table td {
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--brand-neutral-900);
+    padding: 12px 16px;
+    height: 48px;
+    border-bottom: 1px solid var(--brand-neutral-200);
+  }
+  
+  .data-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .data-table tbody tr:hover {
+    background: var(--brand-neutral-50);
+  }
+  
+  /* Section Headers */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  
+  .section-title {
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 700;
+    color: var(--brand-neutral-900);
+  }
+  
+  .section-sub {
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    color: var(--brand-neutral-700);
+  }
+  
+  /* Secondary Cards */
+  .card-secondary {
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-neutral-200);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  
+  .card-secondary + .card-secondary {
+    margin-top: 16px;
+  }
+
+  /* Big Numbers - Pills preenchidas */
+  .bn-wrap {
+    background: #fff;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
+  }
+
+  .bn-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .bn-pill {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 20px;
+    height: 96px;
+    border-radius: 16px;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  .bn-pill .bn-label {
+    font: 600 14px/18px "DM Sans";
+    opacity: 0.9;
+  }
+
+  .bn-pill .bn-value {
+    font: 700 28px/32px "DM Sans";
+    letter-spacing: -0.01em;
+  }
+
+  /* Cores (semáforo visual) */
+  .bn--danger {
+    background: hsl(var(--brand-danger));
+  }
+
+  .bn--warning {
+    background: hsl(var(--brand-warning));
+  }
+
+  .bn--success {
+    background: hsl(var(--brand-success));
+  }
+
+  .bn--info {
+    background: hsl(var(--brand-primary-600));
+  }
+
+  /* Acessibilidade */
+  .bn-pill:focus-visible {
+    box-shadow: var(--focus-ring);
+    outline: none;
+  }
+
+  /* Proibições visuais */
+  .bn-pill,
+  .bn-wrap {
+    background-image: none;
+  }
+
+  /* PADRÃO DE LISTAS/TABELAS INTERNAS */
+  
+  /* CARD DE SEÇÃO (como "Outros Procedimentos / Anexos Médicos") */
+  .list-pattern .section-card {
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-neutral-200);
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(16, 24, 40, 0.06);
+    padding: 16px;
+    position: relative;
+  }
+  
+  .list-pattern .section-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 4px;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    background: var(--brand-success);
+  }
+  
+  /* TÍTULOS À ESQUERDA/DIREITA DO CARD */
+  .list-pattern .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  
+  .list-pattern .section-title {
+    font: 700 16px/24px "DM Sans";
+    color: var(--brand-neutral-900);
+  }
+  
+  .list-pattern .section-subtitle {
+    font: 600 14px/20px "DM Sans";
+    color: var(--brand-neutral-700);
+  }
+  
+  /* TABELA NO PADRÃO DO ANEXO */
+  .list-pattern .data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+  
+  .list-pattern .data-table thead th {
+    background: var(--brand-primary-600);
+    color: #fff;
+    font: 700 12px/16px "DM Sans";
+    text-transform: none;
+    padding: 12px 14px;
+    border-right: 1px solid rgba(255, 255, 255, 0.18);
+  }
+  
+  .list-pattern .data-table thead th:last-child {
+    border-right: none;
+  }
+  
+  /* Células e linhas */
+  .list-pattern .data-table tbody td {
+    background: #fff;
+    color: var(--brand-neutral-900);
+    font: 600 14px/20px "DM Sans";
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--brand-neutral-200);
+  }
+  
+  .list-pattern .data-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .list-pattern .data-table tbody tr:hover td {
+    background: var(--brand-neutral-50);
+  }
+  
+  /* COLUNA DE STATUS (ícones red/green como no anexo) */
+  .list-pattern .status-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+  
+  .list-pattern .status-dot svg {
+    width: 12px;
+    height: 12px;
+    color: #fff;
+  }
+  
+  .list-pattern .status--ok {
+    background: var(--brand-success);
+  }
+  
+  .list-pattern .status--no {
+    background: var(--brand-danger);
+  }
+  
+  /* LINKS DE PDF EM "ANEXOS MÉDICOS" (ícone + label ao lado) */
+  .list-pattern .pdf-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font: 600 14px/20px "DM Sans";
+    color: var(--brand-primary-600);
+    text-decoration: none;
+    padding: 6px 0;
+  }
+  
+  .list-pattern .pdf-link .icon {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+  }
+  
+  .list-pattern .pdf-link:hover {
+    text-decoration: underline;
+  }
+  
+  .list-pattern .pdf-link:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-radius: 8px;
+  }
+  
+  /* CTA DE EXPORTAÇÃO (ÍCONE + "Exportar …"), quando for botão */
+  .list-pattern .btn {
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+  }
+  
+  .list-pattern .btn--secondary {
+    background: #fff;
+    color: var(--brand-neutral-900);
+    border: 1px solid var(--brand-neutral-200);
+  }
+  
+  .list-pattern .btn--secondary:hover {
+    background: var(--brand-neutral-50);
+  }
+  
+  .list-pattern .btn--secondary:focus-visible {
+    box-shadow: var(--focus-ring);
+    outline: none;
+  }
+  
+  .list-pattern .btn .icon {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+  }
+  
+  /* ACESSIBILIDADE */
+  .list-pattern a[role="button"],
+  .list-pattern button {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .list-pattern .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  /* ========== ACTIONS BAR (botões de ação do topo) ========== */
+  .actions-bar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* Base genérica para botões */
+  .actions-bar .btn {
+    height: 42px;
+    padding: 0 14px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font: 600 14px/20px "DM Sans";
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    cursor: pointer;
+  }
+
+  /* PRIMARY — botão principal (ex: "Editar OPME") */
+  .actions-bar .btn--primary {
+    background: var(--brand-primary-600);
+    color: #fff;
+    border: 1px solid var(--brand-primary-600);
+    position: relative;
+    z-index: 1;
+  }
+
+  .actions-bar .btn--primary:hover {
+    filter: brightness(0.96);
+  }
+
+  .actions-bar .btn--primary:focus-visible {
+    box-shadow: var(--focus-ring);
+    outline: none;
+  }
+
+  /* Garantir que nenhuma classe ghost/outline sobrescreva */
+  .actions-bar .btn--primary.is-ghost,
+  .actions-bar .btn--primary.is-outline {
+    background: var(--brand-primary-600) !important;
+    color: #fff !important;
+  }
+
+  /* Disabled state */
+  .actions-bar .btn--primary[disabled] {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  /* SECONDARY — botões secundários (ex: Exportar CSV/PDF) */
+  .actions-bar .btn--secondary {
+    background: var(--brand-surface);
+    color: var(--brand-neutral-900);
+    border: 1px solid var(--brand-neutral-200);
+  }
+
+  .actions-bar .btn--secondary:hover {
+    background: var(--brand-neutral-50);
+  }
+
+  .actions-bar .btn--secondary:focus-visible {
+    box-shadow: var(--focus-ring);
+    outline: none;
+  }
+
+  .actions-bar .btn--secondary[disabled] {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  /* Ícones dentro dos botões (16px) */
+  .actions-bar .btn .icon {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+  }
+
+  /* Responsividade: empilhar em telas pequenas */
+  @media (max-width: 640px) {
+    .actions-bar {
+      flex-direction: column-reverse;
+      align-items: stretch;
+    }
+    .actions-bar .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
+/* ------------ PADRÃO VISUAL COMPANY LIST (PÁGINAS INTERNAS) ------------ */
+
+/* ------------ CARD DE SEÇÃO (faixa verde no topo) ------------ */
+.company-list .section-card{
+  position:relative;
+  background:var(--brand-surface);
+  border:1px solid var(--brand-neutral-200);
+  border-radius:16px;
+  box-shadow:0 8px 20px rgba(16,24,40,.06);
+  padding:16px;
+}
+.company-list .section-card::before{
+  content:""; position:absolute; left:0; right:0; top:0; height:4px;
+  background:var(--brand-success);
+  border-top-left-radius:16px; border-top-right-radius:16px;
+}
+
+/* ------------ TÍTULOS E SUBTÍTULOS (azuis) ------------ */
+.company-list .section-header{
+  display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;
+}
+.company-list .section-title{
+  font:700 16px/24px "DM Sans"; color:var(--brand-primary-600);
+}
+.company-list .section-subtitle{
+  font:600 14px/20px "DM Sans"; color:var(--brand-primary-600);
+}
+
+/* ------------ LISTA DE LINKS (ex.: "Outros Procedimentos") ------------ */
+.company-list .link-list{ display:flex; flex-direction:column; gap:6px; }
+.company-list .link-list a{
+  color:var(--brand-primary-600); font:700 16px/24px "DM Sans";
+  text-decoration:none;
+}
+.company-list .link-list a:hover{ text-decoration:underline; }
+.company-list .link-list a:focus-visible{ outline:none; box-shadow:var(--focus-ring); border-radius:8px; }
+
+/* ------------ LINKS DE PDF (coluna "Anexos Médicos") ------------ */
+.company-list .pdf-link{
+  display:inline-flex; align-items:center; gap:8px;
+  color:var(--brand-primary-600); font:600 14px/20px "DM Sans";
+  text-decoration:none; padding:4px 0;
+}
+.company-list .pdf-link .icon{
+  width:18px; height:18px; display:inline-block; background:currentColor;
+}
+.company-list .pdf-link:hover{ text-decoration:underline; }
+.company-list .pdf-link:focus-visible{ outline:none; box-shadow:var(--focus-ring); border-radius:8px; }
+
+/* ------------ TABELA (cabeçalho azul e zebra) ------------ */
+.company-list .table{
+  width:100%; border-collapse:separate; border-spacing:0;
+  background:#fff; border-radius:12px; overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+.company-list .table thead th{
+  background:var(--brand-primary-600); color:#fff;
+  font:700 12px/16px "DM Sans";
+  padding:12px 14px; border-right:1px solid rgba(255,255,255,.18);
+}
+.company-list .table thead th:last-child{ border-right:none; }
+
+.company-list .table tbody td{
+  background:#fff; color:var(--brand-neutral-900);
+  font:600 14px/20px "DM Sans";
+  padding:12px 14px; border-bottom:1px solid var(--brand-neutral-200);
+}
+.company-list .table tbody tr:last-child td{ border-bottom:none; }
+.company-list .table tbody tr:hover td{ background:var(--brand-neutral-50); }
+
+/* ------------ COLUNA "HOMOLOGAÇÃO" (bolinhas verde/vermelha) ------------ */
+.company-list .status-cell{ width:48px; text-align:center; }
+.company-list .status-dot{
+  width:22px; height:22px; border-radius:999px; display:inline-flex;
+  align-items:center; justify-content:center;
+  box-shadow:0 1px 2px rgba(0,0,0,.06);
+}
+.company-list .status-dot svg{ width:12px; height:12px; color:#fff; }
+.company-list .status--ok { background:var(--brand-success); }
+.company-list .status--no { background:var(--brand-danger); }
+
+/* ------------ ADAPTAÇÃO das listas "Anexado / Ausente" para o padrão ------------ */
+.company-list .doc-row{
+  display:grid; grid-template-columns: 28px 1fr auto; align-items:center;
+  gap:12px; padding:10px 12px; border-radius:10px; border:1px solid var(--brand-neutral-200);
+  background:#fff; box-shadow:0 1px 3px rgba(16,24,40,.05);
+}
+.company-list .doc-row + .doc-row{ margin-top:10px; }
+.company-list .doc-row:hover{ background:var(--brand-neutral-50); }
+
+.company-list .doc-title{ font:700 16px/24px "DM Sans"; color:var(--brand-neutral-900); }
+
+/* Transformar os botões existentes em chips visuais */
+.company-list .doc-actions{ display:inline-flex; gap:8px; }
+.company-list .chip{
+  display:inline-flex; align-items:center; gap:4px; height:28px; padding:0 12px;
+  border-radius:999px; font:700 12px/16px "DM Sans";
+  border:1px solid var(--brand-neutral-200); background:#fff; color:var(--brand-neutral-900);
+  cursor:pointer; transition: all 0.15s ease;
+}
+.company-list .chip--ok{ 
+  background:color-mix(in srgb, var(--brand-success) 12%, #fff); 
+  color:var(--brand-success); 
+  border-color:var(--brand-success); 
+}
+.company-list .chip--no{ 
+  background:color-mix(in srgb, var(--brand-danger) 12%, #fff); 
+  color:var(--brand-danger); 
+  border-color:var(--brand-danger); 
+}
+.company-list .chip:hover{ transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,.08); }
+.company-list .chip:focus-visible{ outline:none; box-shadow:var(--focus-ring); }
+
+/* ------------ Acessibilidade ------------ */
+.company-list [tabindex], .company-list button, .company-list a{ -webkit-tap-highlight-color:transparent; }

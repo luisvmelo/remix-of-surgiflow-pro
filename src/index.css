@@ -1,3 +1,6 @@
+/* Tema do OPME.AI (src/opme), confinado em .opme-theme; precisa vir antes das diretivas do Tailwind */
+@import "./opme/opme.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
