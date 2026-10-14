@@ -192,7 +192,14 @@ export interface Pedido {
   dataCirurgia: string;
 }
 
+/** Configuração do hospital para as recomendações (aba Configuração da gestão) */
+export interface ConfigHospital {
+  considerarMargem: boolean;
+  pesos: { liberacao: number; glosa: number; margem: number };
+}
+
 export interface Dominio {
+  config: ConfigHospital;
   hospitais: Hospital[];
   medicos: Medico[];
   operadoras: Operadora[];

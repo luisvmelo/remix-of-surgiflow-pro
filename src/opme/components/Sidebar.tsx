@@ -1,7 +1,8 @@
-import { BarChart3, ClipboardList, Lightbulb, LogOut, Settings, UserCheck, type LucideIcon } from "lucide-react";
+import { ClipboardList, LogOut, UserCheck, type LucideIcon } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@opme/contexts/AuthContext";
 import { cn } from "@opme/lib/utils";
+import { useEmbutido } from "@opme/embutido";
 import { ORIGENS_PEDIDO } from "@opme/config/produto";
 
 interface ItemNav {
@@ -36,6 +37,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
   const { logout } = useAuth();
+  const embutido = useEmbutido();
 
   // O pedido aberto a partir do tático ou do estratégico pertence à tela de origem
   const origem = ORIGENS_PEDIDO[new URLSearchParams(search).get("origem") ?? ""];
@@ -65,6 +67,8 @@ const Sidebar = () => {
     </button>
   );
 
+  if (embutido) return null;
+
   return (
     <aside className="w-[220px] min-h-screen bg-[#008DDF] flex flex-col px-3 py-6 shrink-0" aria-label="Módulos">
       <nav className="flex flex-col gap-6">
@@ -81,7 +85,6 @@ const Sidebar = () => {
       </nav>
 
       <div className="mt-auto flex flex-col gap-1 pt-6 border-t border-white/20">
-        {botao("Configurações", Settings, () => navigate("/configuracoes"), pathname.startsWith("/configuracoes"))}
         {botao("Sair", LogOut, handleLogout)}
       </div>
     </aside>

@@ -1,7 +1,7 @@
 /* ===== APLICAR DM SANS ===== */
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
-.opme-theme, .opme-theme * {
+.opme-theme, .opme-theme *, .opme-portais > :not(#root), .opme-portais > :not(#root) * {
   font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
 }
 
@@ -11,7 +11,7 @@
 /* Design System - Brand Tokens */
 
 @layer base {
-  .opme-theme {
+  .opme-theme, .opme-portais > :not(#root) {
     /* Primary Brand */
     --brand-primary: 217 100% 50%; /* #0057FF */
     --brand-primary-600: 221 82% 48%; /* #1D4ED8 */

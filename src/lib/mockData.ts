@@ -1,4 +1,4 @@
-import type { NivelPlano } from "./remuneracao";
+import type { NivelPlano } from "@/dominio/tipos";
 
 // ============================================================
 // MOCK DATA — Protótipo visual "SolicitaCirurg"

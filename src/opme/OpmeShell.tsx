@@ -1,11 +1,6 @@
 import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
-import { AuthProvider } from "@opme/contexts/AuthContext";
-import { HospitalProvider } from "@opme/contexts/HospitalContext";
-import { ConfigProvider } from "@opme/contexts/ConfigContext";
-import { EscolhasProvider } from "@opme/contexts/EscolhasContext";
-import { OtimizadorProvider } from "@opme/contexts/OtimizadorContext";
-import { FilterProvider } from "@opme/contexts/FilterContext";
+import { OpmeProviders } from "@opme/embutido";
 import { Toaster } from "@opme/components/ui/toaster";
 import { Toaster as Sonner } from "@opme/components/ui/sonner";
 
@@ -22,23 +17,13 @@ const OpmeShell = () => {
   }, []);
 
   return (
-  <AuthProvider>
-    <HospitalProvider>
-      <ConfigProvider>
-        <EscolhasProvider>
-          <OtimizadorProvider>
-            <FilterProvider>
-              <div className="opme-theme min-h-screen bg-background text-foreground">
-                <Toaster />
-                <Sonner />
-                <Outlet />
-              </div>
-            </FilterProvider>
-          </OtimizadorProvider>
-        </EscolhasProvider>
-      </ConfigProvider>
-    </HospitalProvider>
-  </AuthProvider>
+    <OpmeProviders>
+      <div className="opme-theme min-h-screen bg-background text-foreground">
+        <Toaster />
+        <Sonner />
+        <Outlet />
+      </div>
+    </OpmeProviders>
   );
 };
 

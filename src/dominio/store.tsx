@@ -5,11 +5,12 @@
 
 import { createContext, useContext, useEffect, useMemo, useReducer, type ReactNode } from "react";
 import { DOMINIO_SEMENTE, PEDIDOS_SEMENTE } from "./dados";
-import type { ContratoMedico, ContratoOperadora, Dominio, Padrao, Pedido, StatusPedido } from "./tipos";
+import type { ConfigHospital, ContratoMedico, ContratoOperadora, Dominio, Padrao, Pedido, StatusPedido } from "./tipos";
 
 export const CHAVE_STORAGE = "solicitacirurg.dominio.v1";
 
 interface Estado {
+  config: ConfigHospital;
   padroes: Dominio["padroes"];
   contratosMedico: ContratoMedico[];
   contratosOperadora: ContratoOperadora[];
@@ -17,6 +18,7 @@ interface Estado {
 }
 
 const SEMENTE: Estado = {
+  config: DOMINIO_SEMENTE.config,
   padroes: DOMINIO_SEMENTE.padroes,
   contratosMedico: DOMINIO_SEMENTE.contratosMedico,
   contratosOperadora: DOMINIO_SEMENTE.contratosOperadora,
@@ -48,6 +50,7 @@ type Acao =
   | { tipo: "sugestao"; procedimentoId: string; sugestaoId: string; aceitar: boolean }
   | { tipo: "contratoMedico"; contrato: ContratoMedico }
   | { tipo: "contratoOperadora"; contrato: ContratoOperadora }
+  | { tipo: "config"; config: ConfigHospital }
   | { tipo: "resetar" };
 
 const mapPedido = (e: Estado, id: string, f: (p: Pedido) => Pedido): Estado => ({
@@ -111,6 +114,8 @@ function reducer(e: Estado, a: Acao): Estado {
           a.contrato,
         ],
       };
+    case "config":
+      return { ...e, config: a.config };
     case "resetar":
       return SEMENTE;
   }
@@ -132,6 +137,7 @@ interface DominioCtx {
   recusarSugestao: (procedimentoId: string, sugestaoId: string) => void;
   salvarContratoMedico: (c: ContratoMedico) => void;
   salvarContratoOperadora: (c: ContratoOperadora) => void;
+  salvarConfig: (c: ConfigHospital) => void;
   resetar: () => void;
 }
 
@@ -149,7 +155,7 @@ export function DominioProvider({ children }: { children: ReactNode }) {
   }, [estado]);
 
   const valor = useMemo<DominioCtx>(() => ({
-    dominio: { ...DOMINIO_SEMENTE, padroes: estado.padroes, contratosMedico: estado.contratosMedico, contratosOperadora: estado.contratosOperadora },
+    dominio: { ...DOMINIO_SEMENTE, config: estado.config, padroes: estado.padroes, contratosMedico: estado.contratosMedico, contratosOperadora: estado.contratosOperadora },
     pedidos: estado.pedidos,
     criarPedido: (p) => {
       const id = novoId("ped");
@@ -166,6 +172,7 @@ export function DominioProvider({ children }: { children: ReactNode }) {
     recusarSugestao: (procedimentoId, sugestaoId) => dispatch({ tipo: "sugestao", procedimentoId, sugestaoId, aceitar: false }),
     salvarContratoMedico: (contrato) => dispatch({ tipo: "contratoMedico", contrato }),
     salvarContratoOperadora: (contrato) => dispatch({ tipo: "contratoOperadora", contrato }),
+    salvarConfig: (config) => dispatch({ tipo: "config", config }),
     resetar: () => dispatch({ tipo: "resetar" }),
   }), [estado]);
 

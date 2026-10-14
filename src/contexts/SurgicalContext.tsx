@@ -1,20 +1,6 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 import { WizardState, WizardStep, mockDocuments, SavedRequest, mockRecommendedOPMEs } from "@/lib/mockData";
-import { HospitalConfig, defaultHospitalConfig } from "@/lib/remuneracao";
 import type { Perfil } from "@/lib/perfis";
-
-const CONFIG_KEY = "solicitacirurg.hospitalConfig";
-
-const loadConfig = (): HospitalConfig => {
-  try {
-    const raw = localStorage.getItem(CONFIG_KEY);
-    if (!raw) return defaultHospitalConfig;
-    const parsed = JSON.parse(raw);
-    return { ...defaultHospitalConfig, ...parsed, fatorFaixa: { ...defaultHospitalConfig.fatorFaixa, ...parsed.fatorFaixa } };
-  } catch {
-    return defaultHospitalConfig;
-  }
-};
 
 interface SurgicalContextType {
   state: WizardState;
@@ -26,8 +12,6 @@ interface SurgicalContextType {
   savedRequests: SavedRequest[];
   saveRequest: (status: "draft" | "awaiting-auth") => void;
   resetWizard: () => void;
-  hospitalConfig: HospitalConfig;
-  setHospitalConfig: (config: HospitalConfig) => void;
   perfil: Perfil | null;
   setPerfil: (perfil: Perfil | null) => void;
 }
@@ -60,15 +44,6 @@ export function SurgicalProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setLoggedIn] = useState(false);
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [savedRequests, setSavedRequests] = useState<SavedRequest[]>([]);
-  const [hospitalConfig, setHospitalConfig] = useState<HospitalConfig>(loadConfig);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(CONFIG_KEY, JSON.stringify(hospitalConfig));
-    } catch {
-      // Sem storage (aba privada etc.): a configuração vale só para esta sessão.
-    }
-  }, [hospitalConfig]);
 
   const setStep = (step: WizardStep) => setState((s) => ({ ...s, currentStep: step }));
   const updateState = (partial: Partial<WizardState>) => setState((s) => ({ ...s, ...partial }));
@@ -144,7 +119,7 @@ export function SurgicalProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <SurgicalContext.Provider value={{ state, setStep, updateState, isLoggedIn, setLoggedIn, stepStatus, savedRequests, saveRequest, resetWizard, hospitalConfig, setHospitalConfig, perfil, setPerfil }}>
+    <SurgicalContext.Provider value={{ state, setStep, updateState, isLoggedIn, setLoggedIn, stepStatus, savedRequests, saveRequest, resetWizard, perfil, setPerfil }}>
       {children}
     </SurgicalContext.Provider>
   );

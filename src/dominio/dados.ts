@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  ContratoMedico, ContratoOperadora, Dominio, Hospital, ItemCatalogo, ItemPadrao, Marca, Medico,
+  ConfigHospital, ContratoMedico, ContratoOperadora, Dominio, Hospital, ItemCatalogo, ItemPadrao, Marca, Medico,
   NivelPlano, Operadora, Padrao, Pedido, Procedimento,
 } from "./tipos";
 import { pedidoSugerido, compraRapida } from "./motor";
@@ -390,7 +390,10 @@ export const CONTRATOS_MEDICO: ContratoMedico[] = [
   { medicoId: "7", procedimentos: ["artroscopia-joelho", "lca", "ombro", "punho", "plato"], participaComplemento: true, repasseEletivaDias: 60, repasseUrgenciaDias: 100, vigencia: "2026-04-01" },
 ];
 
+export const CONFIG_PADRAO: ConfigHospital = { considerarMargem: true, pesos: { liberacao: 40, glosa: 35, margem: 25 } };
+
 export const DOMINIO_SEMENTE: Dominio = {
+  config: CONFIG_PADRAO,
   hospitais: HOSPITAIS,
   medicos: MEDICOS,
   operadoras: OPERADORAS,

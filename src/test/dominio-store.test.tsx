@@ -50,4 +50,11 @@ describe("store do domínio", () => {
     const { result } = renderHook(() => useDominio(), { wrapper });
     expect(result.current.pedidos.length).toBeGreaterThan(5);
   });
+
+  it("salvarConfig atualiza a configuração do hospital e persiste", () => {
+    const { result } = renderHook(() => useDominio(), { wrapper });
+    act(() => result.current.salvarConfig({ considerarMargem: false, pesos: { liberacao: 60, glosa: 40, margem: 0 } }));
+    expect(result.current.dominio.config.considerarMargem).toBe(false);
+    expect(JSON.parse(localStorage.getItem(CHAVE_STORAGE)!).config.pesos.liberacao).toBe(60);
+  });
 });
