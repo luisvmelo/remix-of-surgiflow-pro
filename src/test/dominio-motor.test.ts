@@ -108,6 +108,12 @@ describe("avaliarPedido()", () => {
     expect(a.complemento.motivo).toMatch(/não participa/i);
   });
 
+  it("pedido ainda sem itens não garante complemento nem honorário", () => {
+    const a = avaliarPedido(base({ procedimentoId: "artrodese-lombar" }), D);
+    expect(a.complemento.garantido).toBe(0);
+    expect(a.honorario.garantido).toBe(false);
+  });
+
   it("pedido sem procedimento não quebra e volta incompleto", () => {
     const a = avaliarPedido(base({ procedimentoId: "" }), D);
     expect(a.completo).toBe(false);

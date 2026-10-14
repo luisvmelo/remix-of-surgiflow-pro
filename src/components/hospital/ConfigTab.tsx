@@ -2,7 +2,7 @@ import { useSurgical } from "@/contexts/SurgicalContext";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { FaixaBadge } from "@/components/wizard/items/HonorarioTags";
+import { FaixaBadge } from "@/components/hospital/HonorarioTags";
 import { calcularGuiaMock, mockGuias } from "@/lib/guias";
 import {
   brl, defaultHospitalConfig, escolherEquilibrio, faixaDescricao,

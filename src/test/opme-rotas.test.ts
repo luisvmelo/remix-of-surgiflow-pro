@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { OPME_CAMINHOS } from "@opme/rotas";
 
-const ROTAS_SURGIFLOW = ["/", "/select-doctor", "/home", "/wizard", "/analises", "/medico", "/hospital"];
+const ROTAS_SURGIFLOW = ["/", "/select-doctor", "/home", "/pedido", "/medico", "/hospital"];
 
 describe("rotas do OPME.AI no app unificado", () => {
   it("expõe as telas de Compras e Gerente com os caminhos originais", () => {

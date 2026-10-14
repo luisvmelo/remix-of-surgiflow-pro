@@ -127,7 +127,9 @@ export function avaliarPedido(p: Pedido, d: Dominio): Avaliacao {
   const riscoGlosa = Math.min(95, glosa);
   const liberacaoDias = liberacao + (fora ? DIAS_EXTRA_FORA_PADRAO : 0);
 
+  const semItens = p.itens.length === 0;
   const checklist = [
+    { id: "itens", label: "Materiais escolhidos", ok: !semItens, detalhe: semItens ? "Nenhum item escolhido ainda" : undefined },
     { id: "homologados", label: "Itens homologados na operadora", ok: naoHomologados.length === 0, detalhe: naoHomologados.length ? `${naoHomologados.length} item(ns) sem homologação` : undefined },
     { id: "protocolo", label: "Dentro do protocolo", ok: foraProtocolo.length === 0, detalhe: foraProtocolo.length ? `${foraProtocolo.length} item(ns) que o protocolo não prevê` : undefined },
     { id: "padrao", label: "Marcas do padrão", ok: foraPadrao.length === 0, detalhe: foraPadrao.length ? `${foraPadrao.length} marca(s) fora do leque` : undefined },
@@ -159,7 +161,7 @@ export function avaliarPedido(p: Pedido, d: Dominio): Avaliacao {
     condicoes = [{ tipo: "dentro_padrao", label: "Seguir o pedido sugerido pelo hospital", valor: regra.valor, cumprida: tudoOk, avisoJuridico: false }];
   } else {
     condicoes = regra.condicoes.map((c) => {
-      const cumprida = (() => {
+      const cumprida = !semItens && (() => {
         switch (c.tipo) {
           case "homologados": return naoHomologados.length === 0;
           case "dentro_padrao": return !fora;

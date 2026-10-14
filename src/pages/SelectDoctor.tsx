@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSurgical } from "@/contexts/SurgicalContext";
-import { mockDoctors } from "@/lib/mockData";
+import { useDominio } from "@/dominio/store";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Stethoscope, ArrowRight, Activity, Circle, ArrowLeft } from "lucide-react";
@@ -9,20 +8,17 @@ import { Button } from "@/components/ui/button";
 
 const SelectDoctor = () => {
   const [search, setSearch] = useState("");
-  const { updateState } = useSurgical();
+  const { dominio } = useDominio();
   const navigate = useNavigate();
 
-  const filtered = mockDoctors.filter(
+  const filtered = dominio.medicos.filter(
     (d) =>
-      d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.specialty.toLowerCase().includes(search.toLowerCase()) ||
+      d.nome.toLowerCase().includes(search.toLowerCase()) ||
+      d.especialidade.toLowerCase().includes(search.toLowerCase()) ||
       d.crm.toLowerCase().includes(search.toLowerCase())
   );
 
-  const selectDoctor = (doc: typeof mockDoctors[0]) => {
-    updateState({ doctor: doc, currentStep: 1 });
-    navigate("/wizard");
-  };
+  const selectDoctor = (doc: (typeof dominio.medicos)[number]) => navigate(`/pedido/novo?medico=${doc.id}`);
 
   return (
     <div className="min-h-screen bg-background">
@@ -64,12 +60,10 @@ const SelectDoctor = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-foreground flex items-center gap-2">
-                  {doc.name}
-                  <Circle
-                    className={`w-2.5 h-2.5 shrink-0 ${doc.active ? "fill-success text-success" : "fill-muted-foreground/40 text-muted-foreground/40"}`}
-                  />
+                  {doc.nome}
+                  <Circle className="w-2.5 h-2.5 shrink-0 fill-success text-success" />
                 </div>
-                <div className="text-sm text-muted-foreground">{doc.specialty}</div>
+                <div className="text-sm text-muted-foreground">{doc.especialidade}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">{doc.crm}</div>
               </div>
               <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />

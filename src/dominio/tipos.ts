@@ -153,6 +153,8 @@ export interface ContratoMedico {
   repasseEletivaDias: number;
   repasseUrgenciaDias: number;
   vigencia: string;
+  /** Pedido 100% conforme vai direto para Compras, sem passar pela validação do médico */
+  envioAutomatico?: boolean;
 }
 
 export interface ItemPedido {

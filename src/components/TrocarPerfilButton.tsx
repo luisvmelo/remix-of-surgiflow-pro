@@ -10,8 +10,8 @@ const TrocarPerfilButton = () => {
 
   if (pathname === "/") return null;
 
-  // As telas de guia do médico têm uma barra de ações fixa no rodapé: o botão fica acima dela
-  const acimaDaBarra = pathname.startsWith("/medico/guia");
+  // As telas de pedido do médico têm uma barra de ações fixa no rodapé: o botão fica acima dela
+  const acimaDaBarra = pathname.startsWith("/medico/pedido");
 
   const sair = () => {
     setPerfil(null);

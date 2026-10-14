@@ -7,12 +7,10 @@ import { SurgicalProvider } from "@/contexts/SurgicalContext";
 import { DominioProvider } from "@/dominio/store";
 import Login from "./pages/Login";
 import SelectDoctor from "./pages/SelectDoctor";
-import Homepage from "./pages/Homepage";
-import Wizard from "./pages/Wizard";
-import Analises from "./pages/Analises";
-import DoctorHome from "./pages/doctor/DoctorHome";
-import DoctorGuiaDetail from "./pages/doctor/DoctorGuiaDetail";
-import DoctorGuiaEdit from "./pages/doctor/DoctorGuiaEdit";
+import SecretariaHome from "./pages/secretaria/SecretariaHome";
+import PedidoPage from "./pages/PedidoPage";
+import MedicoHome from "./pages/medico/MedicoHome";
+import MedicoPedido from "./pages/medico/MedicoPedido";
 import HospitalHome from "./pages/hospital/HospitalHome";
 import NotFound from "./pages/NotFound";
 import TrocarPerfilButton from "@/components/TrocarPerfilButton";
@@ -33,12 +31,11 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/select-doctor" element={<SelectDoctor />} />
-            <Route path="/home" element={<Homepage />} />
-            <Route path="/wizard" element={<Wizard />} />
-            <Route path="/analises" element={<Analises />} />
-            <Route path="/medico" element={<DoctorHome />} />
-            <Route path="/medico/guia/:id" element={<DoctorGuiaDetail />} />
-            <Route path="/medico/guia/:id/editar" element={<DoctorGuiaEdit />} />
+            <Route path="/home" element={<SecretariaHome />} />
+            <Route path="/pedido/novo" element={<PedidoPage />} />
+            <Route path="/pedido/:id" element={<PedidoPage />} />
+            <Route path="/medico" element={<MedicoHome />} />
+            <Route path="/medico/pedido/:id" element={<MedicoPedido />} />
             <Route path="/hospital" element={<HospitalHome />} />
             <Route element={<OpmeShell />}>
               {OPME_ROTAS.map((r) => (

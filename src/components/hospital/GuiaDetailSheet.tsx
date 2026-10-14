@@ -1,5 +1,5 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { FaixaBadge } from "@/components/wizard/items/HonorarioTags";
+import { FaixaBadge } from "@/components/hospital/HonorarioTags";
 import { useSurgical } from "@/contexts/SurgicalContext";
 import { calcularGuiaMock, operadoraNome, type GuiaMock } from "@/lib/guias";
 import { mockLinkedProcedures } from "@/lib/mockData";

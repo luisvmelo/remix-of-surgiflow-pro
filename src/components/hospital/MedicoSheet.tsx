@@ -1,5 +1,5 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { FaixaBadge } from "@/components/wizard/items/HonorarioTags";
+import { FaixaBadge } from "@/components/hospital/HonorarioTags";
 import type { MedicoConsultoria } from "@/lib/consultoria";
 import { brl } from "@/lib/remuneracao";
 import { cn } from "@/lib/utils";
