@@ -3,6 +3,8 @@ import { mockRecommendedOPMEs } from "@/lib/mockData";
 import { Search, Plus, Check, Minus, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useRemuneracao } from "@/hooks/useRemuneracao";
+import { FaixaBadge, ComplementarValue } from "./HonorarioTags";
 
 interface SelectedItem {
   name: string;
@@ -18,6 +20,7 @@ const ItemSearch = ({ selectedItems, onToggle }: Props) => {
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [previewQtys, setPreviewQtys] = useState<Record<string, number>>({});
+  const { complementarDoItem, faixaDoItem } = useRemuneracao();
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const results = query.length >= 2
@@ -64,8 +67,7 @@ const ItemSearch = ({ selectedItems, onToggle }: Props) => {
             results.map((item) => {
               const isSelected = selectedItems.some((s) => s.name === item.name);
               const qty = getQty(item.name);
-              const baseImpact = parseInt(item.impactDelta.replace(/[^\d-]/g, "")) || 0;
-              const liveImpact = baseImpact * qty;
+              const liveImpact = complementarDoItem(item.name, qty);
 
               return (
                 <div
@@ -80,6 +82,7 @@ const ItemSearch = ({ selectedItems, onToggle }: Props) => {
                       <div className="font-medium text-foreground text-xs">{item.name}</div>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-[10px] text-muted-foreground">{item.supplier}</span>
+                        <FaixaBadge faixa={faixaDoItem(item.name)} />
                         {item.isOfensor && (
                           <span className="badge-danger text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
                             <TrendingDown className="w-2 h-2" /> Ofensor
@@ -92,7 +95,7 @@ const ItemSearch = ({ selectedItems, onToggle }: Props) => {
                         )}
                         {item.improvesRent && (
                           <span className="badge-success text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-                            <TrendingUp className="w-2 h-2" /> +Rent
+                            <TrendingUp className="w-2 h-2" /> Recomendado
                           </span>
                         )}
                       </div>
@@ -118,12 +121,7 @@ const ItemSearch = ({ selectedItems, onToggle }: Props) => {
                       </button>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={cn(
-                        "text-xs font-bold tabular-nums",
-                        liveImpact > 0 ? "text-success" : liveImpact < 0 ? "text-destructive" : "text-muted-foreground"
-                      )}>
-                        {liveImpact >= 0 ? "+" : ""}R$ {Math.abs(liveImpact)}
-                      </span>
+                      <ComplementarValue value={liveImpact} />
                       <button
                         onClick={() => onToggle(item.name, qty)}
                         className={cn(

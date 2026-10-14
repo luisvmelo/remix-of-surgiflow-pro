@@ -2,6 +2,8 @@ import { useState } from "react";
 import { mockRecommendedOPMEs } from "@/lib/mockData";
 import { Plus, Check, Minus, TrendingUp, TrendingDown, AlertTriangle, Sparkles, History, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRemuneracao } from "@/hooks/useRemuneracao";
+import { FaixaBadge, ComplementarValue } from "./HonorarioTags";
 
 interface SelectedItem {
   name: string;
@@ -26,10 +28,8 @@ const ItemCard = ({
   onToggle: (qty: number) => void;
 }) => {
   const [previewQty, setPreviewQty] = useState(1);
-  const baseImpact = parseInt(item.impactDelta.replace(/[^\d-]/g, "")) || 0;
-  const isPositive = baseImpact > 0;
-  const isNegative = baseImpact < 0;
-  const liveImpact = baseImpact * previewQty;
+  const { complementarDoItem, faixaDoItem } = useRemuneracao();
+  const liveImpact = complementarDoItem(item.name, previewQty);
 
   return (
     <div className={cn(
@@ -47,6 +47,7 @@ const ItemCard = ({
 
       {/* Badges */}
       <div className="flex flex-wrap gap-1 mt-1.5">
+        <FaixaBadge faixa={faixaDoItem(item.name)} />
         {item.doctorUses && <span className="badge-doctor text-[9px] px-1.5 py-0.5 rounded-full">Seu médico</span>}
         {item.isOfensor && (
           <span className="badge-danger text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
@@ -60,7 +61,7 @@ const ItemCard = ({
         )}
         {item.improvesRent && (
           <span className="badge-success text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-            <TrendingUp className="w-2 h-2" /> +Rent
+            <TrendingUp className="w-2 h-2" /> Recomendado
           </span>
         )}
       </div>
@@ -87,12 +88,7 @@ const ItemCard = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <span className={cn(
-            "text-xs font-bold tabular-nums",
-            liveImpact > 0 ? "text-success" : liveImpact < 0 ? "text-destructive" : "text-muted-foreground"
-          )}>
-            {liveImpact >= 0 ? "+" : ""}R$ {Math.abs(liveImpact)}
-          </span>
+          <ComplementarValue value={liveImpact} />
           <button
             onClick={() => onToggle(previewQty)}
             className={cn(
@@ -182,6 +178,7 @@ const mockEquivalences = [
 ];
 
 export const EquivalenceItems = ({ selectedItems, onToggle, onQuantity }: Omit<Props, "operadoraName" | "search">) => {
+  const { complementarDoItem, faixaDoItem } = useRemuneracao();
   return (
     <div className="glass-card rounded-xl p-4 animate-fade-in border-accent/20">
       <div className="flex items-center gap-2 mb-1">
@@ -189,14 +186,13 @@ export const EquivalenceItems = ({ selectedItems, onToggle, onQuantity }: Omit<P
         <h3 className="font-bold text-foreground text-sm">Equivalência Técnica</h3>
       </div>
       <p className="text-xs text-muted-foreground mb-3">
-        Substituições que mantêm a qualidade e melhoram rentabilidade
+        Substituições que mantêm a qualidade clínica — veja o efeito no honorário
       </p>
       <div className="space-y-2">
         {mockEquivalences.map((eq) => {
           const sel = selectedItems.find((s) => s.name === eq.equivalent);
           const [previewQty, setPreviewQty] = useState(1);
-          const baseImpact = parseInt(eq.impactDelta.replace(/[^\d-]/g, "")) || 0;
-          const liveImpact = baseImpact * previewQty;
+          const liveImpact = complementarDoItem(eq.equivalent, previewQty);
 
           return (
             <div
@@ -210,7 +206,9 @@ export const EquivalenceItems = ({ selectedItems, onToggle, onQuantity }: Omit<P
                 <div className="flex-1 min-w-0">
                   <div className="text-[10px] text-muted-foreground line-through">{eq.original}</div>
                   <div className="font-semibold text-foreground text-xs mt-0.5">{eq.equivalent}</div>
-                  <div className="text-[10px] text-muted-foreground">{eq.supplier}</div>
+                  <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                    {eq.supplier} <FaixaBadge faixa={faixaDoItem(eq.equivalent)} />
+                  </div>
                   <div className="text-[10px] text-accent-foreground mt-1 italic">{eq.reason}</div>
                 </div>
               </div>
@@ -234,12 +232,7 @@ export const EquivalenceItems = ({ selectedItems, onToggle, onQuantity }: Omit<P
                   </button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={cn(
-                    "text-xs font-bold tabular-nums",
-                    liveImpact > 0 ? "text-success" : "text-destructive"
-                  )}>
-                    {liveImpact >= 0 ? "+" : ""}R$ {Math.abs(liveImpact)}
-                  </span>
+                  <ComplementarValue value={liveImpact} />
                   <button
                     onClick={() => onToggle(eq.equivalent, previewQty)}
                     className={cn(

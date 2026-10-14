@@ -15,7 +15,7 @@ interface SelectedItem {
 
 const StepItems = () => {
   const { state, updateState, setStep } = useSurgical();
-  const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
+  const [selectedItems, setSelectedItems] = useState<SelectedItem[]>(state.selectedOpmes);
   const [selectedSuppliers, setSelectedSuppliers] = useState<string[]>([]);
   const operadoraName = state.operadora?.name || "—";
 
@@ -66,6 +66,7 @@ const StepItems = () => {
     const baseGloss = state.linkedProcedures.length > 0 ? prevGloss : 8;
 
     updateState({
+      selectedOpmes: selectedItems,
       rentabilityScore: baseRent + itemRentDelta,
       glossRisk: Math.max(0, baseGloss + itemGlossDelta),
     });

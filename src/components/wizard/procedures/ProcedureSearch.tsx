@@ -3,6 +3,8 @@ import { mockLinkedProcedures } from "@/lib/mockData";
 import { Search, Plus, Check, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useRemuneracao } from "@/hooks/useRemuneracao";
+import { brlDelta } from "@/lib/remuneracao";
 
 interface Props {
   selectedCodes: string[];
@@ -13,6 +15,7 @@ interface Props {
 const ProcedureSearch = ({ selectedCodes, onToggle, operadoraName }: Props) => {
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
+  const { honorarioDoProcedimento } = useRemuneracao();
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const results = query.length >= 2
@@ -56,8 +59,7 @@ const ProcedureSearch = ({ selectedCodes, onToggle, operadoraName }: Props) => {
           ) : (
             results.map((proc) => {
               const isSelected = selectedCodes.includes(proc.code);
-              const isPositive = proc.rentabilityDelta.startsWith("+") && proc.rentabilityDelta !== "+R$ 0";
-              const isNegative = proc.rentabilityDelta.startsWith("-");
+              const honorario = honorarioDoProcedimento(proc.code);
 
               return (
                 <button
@@ -88,7 +90,7 @@ const ProcedureSearch = ({ selectedCodes, onToggle, operadoraName }: Props) => {
                       )}
                       {proc.improvesRent && (
                         <span className="badge-success text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-                          <TrendingUp className="w-2 h-2" /> +Rent
+                          <TrendingUp className="w-2 h-2" /> Recomendado
                         </span>
                       )}
                     </div>
@@ -97,9 +99,9 @@ const ProcedureSearch = ({ selectedCodes, onToggle, operadoraName }: Props) => {
                     <div className="text-right">
                       <span className={cn(
                         "text-xs font-bold tabular-nums block",
-                        isPositive ? "text-success" : isNegative ? "text-destructive" : "text-muted-foreground"
+                        honorario > 0 ? "text-primary" : "text-muted-foreground"
                       )}>
-                        {proc.rentabilityDelta}
+                        {honorario > 0 ? brlDelta(honorario) : "Sem honorário"}
                       </span>
                       <span className={cn(
                         "text-[10px] tabular-nums",

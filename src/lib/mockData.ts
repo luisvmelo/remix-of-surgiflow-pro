@@ -1,3 +1,5 @@
+import type { NivelPlano } from "./remuneracao";
+
 // ============================================================
 // MOCK DATA — Protótipo visual "SolicitaCirurg"
 // ============================================================
@@ -23,11 +25,11 @@ export const mockOperadoras = [
 ];
 
 export const mockPatients = [
-  { id: "1", name: "João Carlos Silva", cpf: "123.456.789-00", birthDate: "1985-03-15", phone: "(11) 99876-5432", motherName: "Maria da Silva", operadoraId: "1" },
-  { id: "2", name: "Ana Paula Ferreira", cpf: "987.654.321-00", birthDate: "1990-07-22", phone: "(21) 98765-4321", motherName: "Rosa Ferreira", operadoraId: "2" },
-  { id: "3", name: "Carlos Eduardo Martins", cpf: "456.789.123-00", birthDate: "1978-11-08", phone: "(31) 97654-3210", motherName: "Teresa Martins", operadoraId: "3" },
-  { id: "4", name: "Mariana Souza Lima", cpf: "321.654.987-00", birthDate: "1992-01-30", phone: "(11) 96543-2109", motherName: "Lucia Souza", operadoraId: "1" },
-  { id: "5", name: "Roberto Nascimento", cpf: "654.321.789-00", birthDate: "1965-09-12", phone: "(21) 95432-1098", motherName: "Sônia Nascimento", operadoraId: "4" },
+  { id: "1", name: "João Carlos Silva", cpf: "123.456.789-00", birthDate: "1985-03-15", phone: "(11) 99876-5432", motherName: "Maria da Silva", planoNivel: "Executivo" as NivelPlano, operadoraId: "1" },
+  { id: "2", name: "Ana Paula Ferreira", cpf: "987.654.321-00", birthDate: "1990-07-22", phone: "(21) 98765-4321", motherName: "Rosa Ferreira", planoNivel: "Especial" as NivelPlano, operadoraId: "2" },
+  { id: "3", name: "Carlos Eduardo Martins", cpf: "456.789.123-00", birthDate: "1978-11-08", phone: "(31) 97654-3210", motherName: "Teresa Martins", planoNivel: "Básico" as NivelPlano, operadoraId: "3" },
+  { id: "4", name: "Mariana Souza Lima", cpf: "321.654.987-00", birthDate: "1992-01-30", phone: "(11) 96543-2109", motherName: "Lucia Souza", planoNivel: "Especial" as NivelPlano, operadoraId: "1" },
+  { id: "5", name: "Roberto Nascimento", cpf: "654.321.789-00", birthDate: "1965-09-12", phone: "(21) 95432-1098", motherName: "Sônia Nascimento", planoNivel: "Executivo" as NivelPlano, operadoraId: "4" },
 ];
 
 export const mockExtractedItems = [
@@ -89,6 +91,7 @@ export const mockDocuments = [
 
 // ============ Types ============
 
+
 export type WizardStep = 0 | 1 | 2 | 3 | 4 | 5;
 
 export interface WizardState {
@@ -96,11 +99,13 @@ export interface WizardState {
   doctor: typeof mockDoctors[0] | null;
   patient: typeof mockPatients[0] | null;
   operadora: typeof mockOperadoras[0] | null;
+  planoNivel: NivelPlano;
   uploadedFile: string | null;
   extractedItems: typeof mockExtractedItems;
   confirmedItems: boolean;
   selectedProcedure: typeof mockProcedures[0] | null;
   linkedProcedures: string[];
+  selectedOpmes: { name: string; quantity: number }[];
   documents: typeof mockDocuments;
   rentabilityScore: number;
   glossRisk: number;

@@ -13,6 +13,10 @@ import {
 } from "lucide-react";
 import { mockLinkedProcedures, mockDocuments, mockRecommendedOPMEs } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
+import {
+  calcularGuia, complementarItem, honorarioVinculado, equivalencias, infoMatMed, brl, brlDelta,
+} from "@/lib/remuneracao";
+import { FaixaBadge, ComplementarValue } from "./items/HonorarioTags";
 
 // ── Historical package data ──────────────────────────────────────
 const getHistoricalPackage = (_code: string | undefined) => ({
@@ -21,13 +25,13 @@ const getHistoricalPackage = (_code: string | undefined) => ({
     { code: "31003079", name: "Bloqueio anestésico regional", delta: "+R$ 420" },
   ],
   items: [
-    { id: "h1", name: "Placa de Titânio 3.5mm", supplier: "Synthes", quantity: 2, type: "OPME" as const },
-    { id: "h2", name: "Parafuso Cortical 3.5x40mm", supplier: "Synthes", quantity: 8, type: "OPME" as const },
-    { id: "h3", name: "Parafuso Bloqueado 3.5x30mm", supplier: "Synthes", quantity: 4, type: "OPME" as const },
+    { id: "h1", name: "Placa LCP 3.5mm Distal Radius", supplier: "Synthes", quantity: 1, type: "OPME" as const },
+    { id: "h2", name: "Parafuso Bloqueado 3.5x28mm", supplier: "Synthes", quantity: 4, type: "OPME" as const },
+    { id: "h3", name: "Âncora Bio-Compósita 5.5mm", supplier: "Arthrex", quantity: 2, type: "OPME" as const },
     { id: "h4", name: "Kit de Instrumental Ortopédico", supplier: "Synthes", quantity: 1, type: "Material" as const },
-    { id: "h5", name: "Fio de Sutura Vicryl 2-0", supplier: "Ethicon", quantity: 3, type: "Material" as const },
-    { id: "h6", name: "Âncora de Sutura 5.5mm", supplier: "Arthrex", quantity: 2, type: "OPME" as const },
-    { id: "h7", name: "Lâmina de Shaver 5.5mm", supplier: "Smith & Nephew", quantity: 2, type: "Material" as const },
+    { id: "h5", name: "Fio de Alta Resistência #2", supplier: "Arthrex", quantity: 3, type: "Material" as const },
+    { id: "h6", name: "Cânula Artroscópica 7mm", supplier: "Smith & Nephew", quantity: 1, type: "OPME" as const },
+    { id: "h7", name: "Lâmina Shaver Agressiva", supplier: "Smith & Nephew", quantity: 2, type: "Material" as const },
     { id: "h8", name: "Dreno Portovac 3.2mm", supplier: "BBraun", quantity: 1, type: "Material" as const },
   ],
   documents: [
@@ -61,7 +65,7 @@ const docSuggestions = mockDocuments.map(d => ({ name: d.name, required: d.requi
 type ModalType = "procedures" | "items" | "documents" | null;
 
 const StepPackageReview = () => {
-  const { state, updateState, setStep, saveRequest, resetWizard } = useSurgical();
+  const { state, updateState, setStep, saveRequest, resetWizard, hospitalConfig } = useSurgical();
   const navigate = useNavigate();
   const basePkg = getHistoricalPackage(state.selectedProcedure?.code);
 
@@ -74,8 +78,29 @@ const StepPackageReview = () => {
   const [modal, setModal] = useState<ModalType>(null);
   const [search, setSearch] = useState("");
 
-  // ── Metrics (static for prototype) ─────────────────────────────
-  const rentColor = basePkg.rentability > 15 ? "text-success" : basePkg.rentability > 0 ? "text-warning" : "text-destructive";
+  // ── Honorário do médico (recalculado a cada escolha) ───────────
+  const opId = state.operadora?.id;
+  const nivel = state.planoNivel;
+  const calc = (procs: typeof procedures, its: typeof items) => calcularGuia({
+    procedimentoCode: state.selectedProcedure?.code,
+    operadoraId: opId,
+    nivel,
+    vinculados: procs.map(p => p.code),
+    itens: its.map(i => ({ name: i.name, quantity: i.quantity })),
+  }, hospitalConfig);
+  const calculo = calc(procedures, items);
+  const calculoHistorico = calc(basePkg.procedures, basePkg.items);
+  const diferencaHistorico = calculo.honorarioTotal - calculoHistorico.honorarioTotal;
+
+  // Trocas por equivalente técnico que aumentam o honorário complementar
+  const trocas = items.flatMap(item => {
+    const eq = equivalencias.find(e => e.original === item.name);
+    if (!eq || items.some(i => i.name === eq.alternativa)) return [];
+    const ganho = complementarItem(eq.alternativa, item.quantity, hospitalConfig) - complementarItem(item.name, item.quantity, hospitalConfig);
+    return ganho > 0 ? [{ item, alternativa: eq.alternativa, ganho }] : [];
+  });
+  const aplicarTroca = (id: string, alternativa: string) =>
+    setItems(prev => prev.map(i => (i.id === id ? { ...i, name: alternativa } : i)));
   const glossColor = basePkg.glossRisk < 15 ? "text-success" : basePkg.glossRisk < 30 ? "text-warning" : "text-destructive";
 
   // ── Remove helpers ─────────────────────────────────────────────
@@ -114,6 +139,7 @@ const StepPackageReview = () => {
       extractedItems: items.map(item => ({ ...item, uncertain: false, status: "ok" as const })),
       linkedProcedures: procedures.map(p => p.code),
       documents: mockDocuments.map(d => ({ ...d, attached: documents.some(pd => pd.name === d.name) })),
+      selectedOpmes: items.map(item => ({ name: item.name, quantity: item.quantity })),
       rentabilityScore: basePkg.rentability,
       glossRisk: basePkg.glossRisk,
       showPackageReview: false,
@@ -171,9 +197,9 @@ const StepPackageReview = () => {
         {/* Metrics */}
         <div className="grid grid-cols-3 gap-2">
           <div className="glass-card rounded-xl p-3 text-center">
-            <TrendingUp className={cn("w-4 h-4 mx-auto mb-0.5", rentColor)} />
-            <div className={cn("text-2xl font-extrabold tracking-tight", rentColor)}>+{basePkg.rentability}%</div>
-            <div className="text-[9px] text-muted-foreground mt-0.5">Rentabilidade</div>
+            <TrendingUp className="w-4 h-4 mx-auto mb-0.5 text-primary" />
+            <div className="text-2xl font-extrabold tracking-tight text-primary tabular-nums">{brl(calculo.honorarioTotal)}</div>
+            <div className="text-[9px] text-muted-foreground mt-0.5">Seu honorário</div>
           </div>
           <div className="glass-card rounded-xl p-3 text-center">
             <AlertTriangle className={cn("w-4 h-4 mx-auto mb-0.5", glossColor)} />
@@ -185,6 +211,54 @@ const StepPackageReview = () => {
             <div className={cn("text-2xl font-extrabold tracking-tight", basePkg.conformidade === 100 ? "text-success" : "text-warning")}>{basePkg.conformidade}%</div>
             <div className="text-[9px] text-muted-foreground mt-0.5">Conformidade</div>
           </div>
+        </div>
+
+        {/* Como suas escolhas afetam seu honorário */}
+        <div className="glass-card rounded-xl p-4 border-primary/20">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <h3 className="text-sm font-bold text-foreground">Como suas escolhas afetam seu honorário</h3>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center mb-3">
+            <div className="rounded-lg bg-muted/40 p-2">
+              <div className="text-[10px] text-muted-foreground">Base do plano</div>
+              <div className="text-sm font-bold text-foreground tabular-nums">{brl(calculo.honorarioPrincipal)}</div>
+              <div className="text-[9px] text-muted-foreground">{state.operadora?.name} · {nivel}</div>
+            </div>
+            <div className="rounded-lg bg-muted/40 p-2">
+              <div className="text-[10px] text-muted-foreground">Procedimentos secundários</div>
+              <div className="text-sm font-bold text-foreground tabular-nums">{brlDelta(calculo.honorarioVinculados)}</div>
+            </div>
+            <div className="rounded-lg bg-success/5 p-2">
+              <div className="text-[10px] text-muted-foreground">Complementar (MatMed)</div>
+              <div className="text-sm font-bold text-success tabular-nums">{brlDelta(calculo.honorarioComplementar)}</div>
+              {!hospitalConfig.rentabilidadeHabilitada && <div className="text-[9px] text-muted-foreground">desativado pelo hospital</div>}
+            </div>
+          </div>
+          <div className="flex items-center justify-between text-xs px-1">
+            <span className="text-muted-foreground">Comparado ao pacote histórico</span>
+            <span className={cn("font-bold tabular-nums", diferencaHistorico > 0 ? "text-success" : diferencaHistorico < 0 ? "text-destructive" : "text-muted-foreground")}>
+              {diferencaHistorico === 0 ? "igual" : brlDelta(diferencaHistorico)}
+            </span>
+          </div>
+          {trocas.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-border/50 space-y-1.5">
+              <div className="text-[11px] font-semibold text-foreground">Trocas por equivalente técnico</div>
+              {trocas.map(t => (
+                <div key={t.item.id} className="flex items-center justify-between gap-2 text-[11px] rounded-lg bg-success/5 border border-success/20 px-3 py-2">
+                  <span className="text-foreground min-w-0">
+                    <span className="line-through text-muted-foreground">{t.item.name}</span> → <span className="font-semibold">{t.alternativa}</span>
+                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="font-bold text-success tabular-nums">{brlDelta(t.ganho)}</span>
+                    <Button size="sm" variant="outline" className="h-7 text-[10px] px-2" onClick={() => aplicarTroca(t.item.id, t.alternativa)}>
+                      Trocar
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Guide content */}
@@ -244,7 +318,9 @@ const StepPackageReview = () => {
                   <span className="text-foreground truncate">{proc.name}</span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="font-bold tabular-nums text-success">{proc.delta}</span>
+                  <span className="font-bold tabular-nums text-primary">
+                    {honorarioVinculado(proc.code, opId, nivel) > 0 ? brlDelta(honorarioVinculado(proc.code, opId, nivel)) : "—"}
+                  </span>
                   <button onClick={() => removeProc(proc.code)} className="p-0.5 rounded hover:bg-destructive/10 transition-colors">
                     <X className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
                   </button>
@@ -276,8 +352,12 @@ const StepPackageReview = () => {
                     <CheckCircle2 className="w-3 h-3 text-success shrink-0" />
                     <span className="font-medium text-foreground truncate">{item.name}</span>
                     <span className="text-muted-foreground shrink-0 hidden sm:inline">· {item.supplier}</span>
+                    <FaixaBadge faixa={infoMatMed(item.name)?.faixa} />
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
+                    {infoMatMed(item.name) && (
+                      <ComplementarValue value={complementarItem(item.name, item.quantity, hospitalConfig)} className="text-[10px]" />
+                    )}
                     <span className="text-muted-foreground tabular-nums">×{item.quantity}</span>
                     <button onClick={() => removeItem(item.id)} className="p-0.5 rounded hover:bg-destructive/10 transition-colors">
                       <X className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
@@ -382,7 +462,9 @@ const StepPackageReview = () => {
                           <Sparkles className="w-2.5 h-2.5 inline mr-0.5" />{p.tag}
                         </span>
                       )}
-                      <span className={cn("text-xs font-bold tabular-nums", p.delta.startsWith("+") ? "text-success" : "text-destructive")}>{p.delta}</span>
+                      <span className="text-xs font-bold tabular-nums text-primary">
+                        {honorarioVinculado(p.code, opId, nivel) > 0 ? brlDelta(honorarioVinculado(p.code, opId, nivel)) : "—"}
+                      </span>
                     </div>
                   </button>
                 ))}
@@ -413,7 +495,8 @@ const StepPackageReview = () => {
                           {s.tag}
                         </span>
                       )}
-                      <span className={cn("text-xs font-bold tabular-nums", s.delta.startsWith("+") ? "text-success" : "text-destructive")}>{s.delta}</span>
+                      <FaixaBadge faixa={infoMatMed(s.name)?.faixa} />
+                      <ComplementarValue value={complementarItem(s.name, 1, hospitalConfig)} />
                     </div>
                   </button>
                 ))}

@@ -1,6 +1,8 @@
 import { mockLinkedProcedures } from "@/lib/mockData";
 import { Zap, History, TrendingUp, Check, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRemuneracao } from "@/hooks/useRemuneracao";
+import { brlDelta } from "@/lib/remuneracao";
 
 interface Props {
   selectedCodes: string[];
@@ -26,17 +28,14 @@ const historicalCodes = mockLinkedProcedures
 const bestRentProcs = mockLinkedProcedures.filter((p) => bestRentCodes.includes(p.code));
 const historicalProcs = mockLinkedProcedures.filter((p) => historicalCodes.includes(p.code));
 
-const bestRentTotal = bestRentProcs.reduce((acc, p) => {
-  return acc + (parseInt(p.rentabilityDelta.replace(/[^\d-]/g, "")) || 0);
-}, 0);
-const historicalTotal = historicalProcs.reduce((acc, p) => {
-  return acc + (parseInt(p.rentabilityDelta.replace(/[^\d-]/g, "")) || 0);
-}, 0);
 
 const avgGlossRent = Math.round(bestRentProcs.reduce((a, p) => a + p.glossRate, 0) / (bestRentProcs.length || 1));
 const avgGlossHist = Math.round(historicalProcs.reduce((a, p) => a + p.glossRate, 0) / (historicalProcs.length || 1));
 
 const SmartSelection = ({ selectedCodes, onApplyAll }: Props) => {
+  const { honorarioDoProcedimento } = useRemuneracao();
+  const bestRentTotal = bestRentProcs.reduce((acc, p) => acc + honorarioDoProcedimento(p.code), 0);
+  const historicalTotal = historicalProcs.reduce((acc, p) => acc + honorarioDoProcedimento(p.code), 0);
   const isRentApplied = bestRentCodes.every((c) => selectedCodes.includes(c));
   const isHistApplied = historicalCodes.every((c) => selectedCodes.includes(c));
 
@@ -71,7 +70,7 @@ const SmartSelection = ({ selectedCodes, onApplyAll }: Props) => {
                 {isRentApplied ? <Check className="w-4 h-4 text-success" /> : <TrendingUp className="w-4 h-4 text-success" />}
               </div>
               <div>
-                <div className="text-xs font-bold text-foreground">Maior Rentabilidade</div>
+                <div className="text-xs font-bold text-foreground">Recomendado</div>
                 <div className="text-[10px] text-muted-foreground">{bestRentProcs.length} procedimentos</div>
               </div>
             </div>
@@ -87,7 +86,8 @@ const SmartSelection = ({ selectedCodes, onApplyAll }: Props) => {
 
             <div className="flex items-center justify-between pt-2 border-t border-border/50">
               <div>
-                <span className="text-lg font-extrabold text-success tabular-nums">+R$ {bestRentTotal.toLocaleString("pt-BR")}</span>
+                <span className="text-lg font-extrabold text-success tabular-nums">{brlDelta(bestRentTotal)}</span>
+                <div className="text-[10px] text-muted-foreground">no honorário</div>
                 <div className="text-[10px] text-muted-foreground">Glosa média: {avgGlossRent}%</div>
               </div>
               {!isRentApplied && (
@@ -138,7 +138,8 @@ const SmartSelection = ({ selectedCodes, onApplyAll }: Props) => {
 
             <div className="flex items-center justify-between pt-2 border-t border-border/50">
               <div>
-                <span className="text-lg font-extrabold text-primary tabular-nums">+R$ {historicalTotal.toLocaleString("pt-BR")}</span>
+                <span className="text-lg font-extrabold text-primary tabular-nums">{brlDelta(historicalTotal)}</span>
+                <div className="text-[10px] text-muted-foreground">no honorário</div>
                 <div className="text-[10px] text-muted-foreground">Glosa média: {avgGlossHist}%</div>
               </div>
               {!isHistApplied && (

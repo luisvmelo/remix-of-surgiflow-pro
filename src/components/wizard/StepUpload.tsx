@@ -39,6 +39,7 @@ const StepUpload = () => {
     }, 0);
 
     updateState({
+      linkedProcedures: linkedProcs,
       rentabilityScore: baseRent + rentBonus,
       glossRisk: Math.max(0, glossBase + glossDelta),
     });

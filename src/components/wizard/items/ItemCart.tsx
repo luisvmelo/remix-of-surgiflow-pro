@@ -3,6 +3,9 @@ import { mockRecommendedOPMEs, mockLinkedProcedures } from "@/lib/mockData";
 import { Package, X, ArrowRight, ClipboardList, Minus, Plus, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useRemuneracao } from "@/hooks/useRemuneracao";
+import { brl, brlDelta } from "@/lib/remuneracao";
+import { FaixaBadge, ComplementarValue } from "./HonorarioTags";
 
 interface SelectedItem {
   name: string;
@@ -22,19 +25,7 @@ const ItemCart = ({ selectedItems, onRemove, onQuantity, onNext }: Props) => {
   // Get procedures from previous step
   const linkedProcs = mockLinkedProcedures.filter((p) => state.linkedProcedures.includes(p.code));
 
-  const totalItemImpact = selectedItems.reduce((acc, sel) => {
-    const item = mockRecommendedOPMEs.find((o) => o.name === sel.name);
-    if (!item) return acc;
-    const val = parseInt(item.impactDelta.replace(/[^\d-]/g, "")) || 0;
-    return acc + val * sel.quantity;
-  }, 0);
-
-  const totalProcImpact = linkedProcs.reduce((acc, p) => {
-    const val = parseInt(p.rentabilityDelta.replace(/[^\d-]/g, "")) || 0;
-    return acc + val;
-  }, 0);
-
-  const totalImpact = totalItemImpact + totalProcImpact;
+  const { calculo, complementarDoItem, honorarioDoProcedimento, faixaDoItem } = useRemuneracao();
 
   return (
     <div className="w-[420px] shrink-0 border-l bg-card flex flex-col h-full">
@@ -86,9 +77,9 @@ const ItemCart = ({ selectedItems, onRemove, onQuantity, onNext }: Props) => {
                   </div>
                   <span className={cn(
                     "text-[10px] font-bold tabular-nums shrink-0",
-                    proc.rentabilityDelta.startsWith("+") ? "text-success" : "text-destructive"
+                    honorarioDoProcedimento(proc.code) > 0 ? "text-primary" : "text-muted-foreground"
                   )}>
-                    {proc.rentabilityDelta}
+                    {honorarioDoProcedimento(proc.code) > 0 ? brlDelta(honorarioDoProcedimento(proc.code)) : "—"}
                   </span>
                 </div>
               ))}
@@ -112,7 +103,6 @@ const ItemCart = ({ selectedItems, onRemove, onQuantity, onNext }: Props) => {
             <div className="space-y-1.5">
               {selectedItems.map((sel, idx) => {
                 const item = mockRecommendedOPMEs.find((o) => o.name === sel.name);
-                const impact = item ? parseInt(item.impactDelta.replace(/[^\d-]/g, "")) || 0 : 0;
                 return (
                   <div
                     key={sel.name}
@@ -126,9 +116,10 @@ const ItemCart = ({ selectedItems, onRemove, onQuantity, onNext }: Props) => {
                         <div className="text-xs font-medium text-foreground leading-tight">
                           {sel.name}
                         </div>
-                        {item && (
-                          <div className="text-[10px] text-muted-foreground mt-0.5">{item.supplier}</div>
-                        )}
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          {item && <span className="text-[10px] text-muted-foreground">{item.supplier}</span>}
+                          <FaixaBadge faixa={faixaDoItem(sel.name)} />
+                        </div>
                       </div>
                       <button
                         onClick={() => onRemove(sel.name)}
@@ -154,12 +145,7 @@ const ItemCart = ({ selectedItems, onRemove, onQuantity, onNext }: Props) => {
                         </button>
                         <span className="text-[10px] text-muted-foreground ml-1">un.</span>
                       </div>
-                      <span className={cn(
-                        "text-[10px] font-bold tabular-nums",
-                        impact >= 0 ? "text-success" : "text-destructive"
-                      )}>
-                        {impact >= 0 ? "+" : ""}R$ {Math.abs(impact * sel.quantity)}
-                      </span>
+                      <ComplementarValue value={complementarDoItem(sel.name, sel.quantity)} className="text-[10px]" />
                     </div>
                   </div>
                 );
@@ -181,11 +167,19 @@ const ItemCart = ({ selectedItems, onRemove, onQuantity, onNext }: Props) => {
             {selectedItems.reduce((a, s) => a + s.quantity, 0)}
           </span>
         </div>
-        <div className="flex items-center justify-between text-xs mb-3">
-          <span className="text-muted-foreground">Impacto total estimado</span>
-          <span className={cn("font-bold", totalImpact >= 0 ? "text-success" : "text-destructive")}>
-            {totalImpact >= 0 ? "+" : ""}R$ {Math.abs(totalImpact).toLocaleString("pt-BR")}
+        <div className="flex items-center justify-between text-xs mb-1">
+          <span className="text-muted-foreground">Honorário base</span>
+          <span className="font-semibold text-foreground tabular-nums">{brl(calculo.honorarioBase)}</span>
+        </div>
+        <div className="flex items-center justify-between text-xs mb-1">
+          <span className="text-muted-foreground">Complementar pelas escolhas</span>
+          <span className={cn("font-semibold tabular-nums", calculo.honorarioComplementar > 0 ? "text-success" : "text-muted-foreground")}>
+            {brlDelta(calculo.honorarioComplementar)}
           </span>
+        </div>
+        <div className="flex items-center justify-between text-sm mb-3 pt-1 border-t border-border/50">
+          <span className="font-semibold text-foreground">Honorário médico</span>
+          <span className="font-extrabold text-primary tabular-nums">{brl(calculo.honorarioTotal)}</span>
         </div>
         <Button onClick={onNext} className="w-full h-10">
           Próxima etapa <ArrowRight className="w-4 h-4 ml-2" />

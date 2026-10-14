@@ -37,6 +37,10 @@
     --info: 210 80% 55%;
     --info-foreground: 0 0% 100%;
 
+    /* Séries de gráfico: hospital × médico (validadas para daltonismo, claro e escuro) */
+    --serie-hospital: #308ce8;
+    --serie-medico: #139e8a;
+
     --border: 210 18% 87%;
     --input: 210 18% 87%;
     --ring: 192 80% 28%;

@@ -4,7 +4,7 @@ import { useSurgical } from "@/contexts/SurgicalContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, Mail, Activity, Stethoscope, ClipboardList } from "lucide-react";
+import { Lock, Mail, Activity, Stethoscope, ClipboardList, Building2 } from "lucide-react";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -12,7 +12,7 @@ const Login = () => {
   const { setLoggedIn, updateState } = useSurgical();
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent, role: "secretary" | "doctor") => {
+  const handleLogin = (e: React.FormEvent, role: "secretary" | "doctor" | "hospital") => {
     e.preventDefault();
     setLoggedIn(true);
     if (role === "doctor") {
@@ -21,6 +21,8 @@ const Login = () => {
         doctor: { id: "1", name: "Dr. Ricardo Almeida", specialty: "Ortopedia", crm: "CRM/SP 12345", active: true },
       });
       navigate("/medico");
+    } else if (role === "hospital") {
+      navigate("/hospital");
     } else {
       navigate("/home");
     }
@@ -128,6 +130,14 @@ const Login = () => {
                   <Stethoscope className="w-4 h-4 mr-2" /> Médico
                 </Button>
               </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={(e) => handleLogin(e, "hospital")}
+                className="w-full h-12 text-sm font-semibold border-info/30 hover:bg-info/5"
+              >
+                <Building2 className="w-4 h-4 mr-2" /> Hospital
+              </Button>
             </div>
           </form>
         </div>

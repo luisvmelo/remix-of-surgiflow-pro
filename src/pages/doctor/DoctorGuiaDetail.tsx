@@ -9,6 +9,11 @@ import {
   MessageSquare, Edit3, ChevronDown, ChevronUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSurgical } from "@/contexts/SurgicalContext";
+import { calcularGuiaMock, mockGuias, operadoraNome } from "@/lib/guias";
+import { brl, brlDelta, complementarItem, equivalencias, honorarioVinculado, infoMatMed } from "@/lib/remuneracao";
+import { mockLinkedProcedures } from "@/lib/mockData";
+import { FaixaBadge } from "@/components/wizard/items/HonorarioTags";
 
 // Mock full guide data
 const mockGuides: Record<string, any> = {
@@ -62,7 +67,7 @@ const mockGuides: Record<string, any> = {
       { name: "Exames pré-operatórios", attached: false },
     ],
     suggestions: [
-      { text: "Substituir Implante Interferencial Titânio por PEEK — economia de R$ 520 e menor risco de glosa", type: "warning" as const },
+      { text: "Substituir Implante Interferencial Titânio por PEEK — menor risco de glosa", type: "warning" as const },
       { text: "Âncora Bio-Compósita é ofensor nesta operadora — considere Âncora PEEK 5.5mm", type: "warning" as const },
       { text: "Faltam 2 documentos obrigatórios para envio", type: "error" as const },
     ],
@@ -89,7 +94,7 @@ const mockGuides: Record<string, any> = {
       { name: "Exames pré-operatórios", attached: true },
     ],
     suggestions: [
-      { text: "Excelente rentabilidade — acima do percentil 85", type: "success" as const },
+      { text: "Pacote dentro da padronização do hospital", type: "success" as const },
       { text: "Lâmina Shaver tem risco de glosa leve — monitorar", type: "info" as const },
     ],
   },
@@ -97,8 +102,15 @@ const mockGuides: Record<string, any> = {
 
 // Fallback for approved items
 ["d4", "d5"].forEach((id) => {
+  const g = mockGuias.find((x) => x.id === id)!;
   mockGuides[id] = {
     ...mockGuides.d1,
+    operadora: operadoraNome(g.operadoraId),
+    procedures: [
+      { name: g.procedure, code: g.code, type: "principal" },
+      ...g.vinculados.map((code) => ({ name: mockLinkedProcedures.find((p) => p.code === code)?.name || code, code })),
+    ],
+    items: g.itens.map((i) => ({ name: i.name, supplier: "", qty: i.quantity, status: "ok" })),
     patient: id === "d4" ? "Carlos Eduardo Martins" : "Roberto Nascimento",
     procedure: id === "d4" ? "Tratamento cirúrgico de fratura de punho" : "Osteossíntese de platô tibial",
     code: id === "d4" ? "30715016" : "30725080",
@@ -119,13 +131,22 @@ const DoctorGuiaDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const guide = mockGuides[id || ""] || mockGuides.d1;
+  const { hospitalConfig } = useSurgical();
+  const guiaBase = mockGuias.find((g) => g.id === id) || mockGuias[0];
+  const calc = calcularGuiaMock(guiaBase, hospitalConfig);
+  const trocas = guiaBase.itens.flatMap((item) => {
+    const eq = equivalencias.find((e) => e.original === item.name);
+    if (!eq) return [];
+    const ganho = complementarItem(eq.alternativa, item.quantity, hospitalConfig) - complementarItem(item.name, item.quantity, hospitalConfig);
+    return ganho > 0 ? [{ text: `Trocar ${item.name} por ${eq.alternativa} (faixa A) soma ${brlDelta(ganho)} ao seu honorário`, type: "info" as const }] : [];
+  });
+  const suggestions = [...guide.suggestions, ...trocas];
   const [comment, setComment] = useState("");
   const [showComment, setShowComment] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>("procedures");
   const [approved, setApproved] = useState(false);
   const [rejected, setRejected] = useState(false);
 
-  const rentColor = guide.rentability > 15 ? "text-success" : guide.rentability > 0 ? "text-warning" : "text-destructive";
   const glossColor = guide.glossRisk < 15 ? "text-success" : guide.glossRisk < 30 ? "text-warning" : "text-destructive";
 
   const toggleSection = (section: string) => {
@@ -174,9 +195,9 @@ const DoctorGuiaDetail = () => {
         {/* Big numbers */}
         <div className="grid grid-cols-3 gap-2 px-4 py-3">
           <div className="glass-card rounded-xl p-3 text-center">
-            <TrendingUp className={cn("w-4 h-4 mx-auto mb-0.5", rentColor)} />
-            <div className={cn("text-xl font-extrabold", rentColor)}>+{guide.rentability}%</div>
-            <div className="text-[9px] text-muted-foreground">Rentabilidade</div>
+            <TrendingUp className="w-4 h-4 mx-auto mb-0.5 text-primary" />
+            <div className="text-base font-extrabold text-primary tabular-nums leading-7 whitespace-nowrap">{brl(calc.honorarioTotal)}</div>
+            <div className="text-[9px] text-muted-foreground">Seu honorário</div>
           </div>
           <div className="glass-card rounded-xl p-3 text-center">
             <AlertTriangle className={cn("w-4 h-4 mx-auto mb-0.5", glossColor)} />
@@ -187,6 +208,31 @@ const DoctorGuiaDetail = () => {
             <Shield className={cn("w-4 h-4 mx-auto mb-0.5", guide.conformidade === 100 ? "text-success" : "text-warning")} />
             <div className={cn("text-xl font-extrabold", guide.conformidade === 100 ? "text-success" : "text-warning")}>{guide.conformidade}%</div>
             <div className="text-[9px] text-muted-foreground">Conformidade</div>
+          </div>
+        </div>
+
+        {/* Seu honorário nesta guia */}
+        <div className="px-4 pb-3">
+          <div className="glass-card rounded-xl p-3">
+            <div className="text-[11px] font-bold text-foreground mb-2">Como suas escolhas afetam seu honorário</div>
+            <div className="grid grid-cols-3 gap-1.5 text-center">
+              <div className="rounded-lg bg-muted/40 p-1.5">
+                <div className="text-[9px] text-muted-foreground">Base do plano</div>
+                <div className="text-xs font-bold tabular-nums">{brl(calc.honorarioPrincipal)}</div>
+              </div>
+              <div className="rounded-lg bg-muted/40 p-1.5">
+                <div className="text-[9px] text-muted-foreground">Secundários</div>
+                <div className="text-xs font-bold tabular-nums">{brlDelta(calc.honorarioVinculados)}</div>
+              </div>
+              <div className="rounded-lg bg-success/5 p-1.5">
+                <div className="text-[9px] text-muted-foreground">Complementar</div>
+                <div className="text-xs font-bold tabular-nums text-success">{brlDelta(calc.honorarioComplementar)}</div>
+              </div>
+            </div>
+            <div className="text-[9px] text-muted-foreground mt-1.5">
+              {operadoraNome(guiaBase.operadoraId)} · plano {guiaBase.nivel}
+              {!hospitalConfig.rentabilidadeHabilitada && " · complementar desativado pelo hospital"}
+            </div>
           </div>
         </div>
 
@@ -215,12 +261,12 @@ const DoctorGuiaDetail = () => {
         </div>
 
         {/* System suggestions */}
-        {guide.suggestions.length > 0 && (
+        {suggestions.length > 0 && (
           <div className="px-4 pb-3">
             <div className={cn(
               "rounded-xl p-3 border",
-              guide.suggestions.some((s: any) => s.type === "error") ? "bg-destructive/5 border-destructive/20" :
-              guide.suggestions.some((s: any) => s.type === "warning") ? "bg-warning/5 border-warning/20" :
+              suggestions.some((s: any) => s.type === "error") ? "bg-destructive/5 border-destructive/20" :
+              suggestions.some((s: any) => s.type === "warning") ? "bg-warning/5 border-warning/20" :
               "bg-success/5 border-success/20"
             )}>
               <div className="flex items-center gap-1.5 mb-2">
@@ -228,7 +274,7 @@ const DoctorGuiaDetail = () => {
                 <span className="text-[11px] font-bold text-foreground">Análise do Sistema</span>
               </div>
               <div className="space-y-1.5">
-                {guide.suggestions.map((s: any, idx: number) => (
+                {suggestions.map((s: any, idx: number) => (
                   <div key={idx} className="flex items-start gap-2 text-[11px]">
                     {s.type === "success" && <CheckCircle2 className="w-3 h-3 text-success shrink-0 mt-0.5" />}
                     {s.type === "warning" && <AlertTriangle className="w-3 h-3 text-warning shrink-0 mt-0.5" />}
@@ -267,7 +313,13 @@ const DoctorGuiaDetail = () => {
                       <CheckCircle2 className={cn("w-3 h-3 shrink-0", p.type === "principal" ? "text-primary" : "text-success")} />
                       <span className="text-foreground truncate">{p.name}</span>
                     </div>
-                    {p.delta && <span className="text-success font-bold shrink-0 ml-2">{p.delta}</span>}
+                    {p.type !== "principal" && (
+                      <span className="text-primary font-bold shrink-0 ml-2 tabular-nums">
+                        {honorarioVinculado(p.code, guiaBase.operadoraId, guiaBase.nivel) > 0
+                          ? brlDelta(honorarioVinculado(p.code, guiaBase.operadoraId, guiaBase.nivel))
+                          : "—"}
+                      </span>
+                    )}
                     {p.type === "principal" && <span className="text-[9px] text-primary font-semibold shrink-0 ml-2">Principal</span>}
                   </div>
                 ))}
@@ -299,6 +351,10 @@ const DoctorGuiaDetail = () => {
                         <span className="text-foreground truncate">{item.name}</span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0 ml-2">
+                        <FaixaBadge faixa={infoMatMed(item.name)?.faixa} />
+                        {complementarItem(item.name, item.qty, hospitalConfig) > 0 && (
+                          <span className="text-success font-bold tabular-nums">{brlDelta(complementarItem(item.name, item.qty, hospitalConfig))}</span>
+                        )}
                         <span className="text-muted-foreground">×{item.qty}</span>
                         {item.status === "offender" && (
                           <span className="badge-danger text-[8px] px-1 py-0.5 rounded-full">Ofensor</span>

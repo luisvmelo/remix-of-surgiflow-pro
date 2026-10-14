@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { calcularGuiaMock, mockGuias } from "@/lib/guias";
+import { brl, brlDelta } from "@/lib/remuneracao";
 
 const mockDoctorRequests = [
   {
@@ -19,58 +21,58 @@ const mockDoctorRequests = [
     procedure: "Artroscopia de Joelho — Meniscectomia", code: "30725119",
     date: "2026-02-18", itemCount: 10, status: "awaiting-validation" as const,
     statusLabel: "Aguardando Validação", missingDocs: 0, hasOffenders: false,
-    rentability: "+12%", glossRisk: "8%", secretary: "Camila Souza",
+    glossRisk: "8%", secretary: "Camila Souza",
   },
   {
     id: "d2", patient: "Ana Paula Ferreira", operadora: "Bradesco Saúde",
     procedure: "Reconstrução de LCA", code: "30725097",
     date: "2026-02-25", itemCount: 8, status: "awaiting-validation" as const,
     statusLabel: "Aguardando Validação", missingDocs: 1, hasOffenders: true,
-    rentability: "+6%", glossRisk: "22%", secretary: "Camila Souza",
+    glossRisk: "22%", secretary: "Camila Souza",
   },
   {
     id: "d3", patient: "Mariana Souza Lima", operadora: "Unimed",
     procedure: "Artroscopia de Ombro — Reparo do manguito", code: "30725038",
     date: "2026-03-12", itemCount: 12, status: "awaiting-validation" as const,
     statusLabel: "Aguardando Validação", missingDocs: 0, hasOffenders: false,
-    rentability: "+18%", glossRisk: "5%", secretary: "Roberta Lima",
+    glossRisk: "5%", secretary: "Roberta Lima",
   },
   {
     id: "d4", patient: "Carlos Eduardo Martins", operadora: "Amil",
     procedure: "Tratamento cirúrgico de fratura de punho", code: "30715016",
     date: "2026-03-05", itemCount: 6, status: "approved" as const,
     statusLabel: "Aprovado", missingDocs: 0, hasOffenders: false,
-    rentability: "+15%", glossRisk: "4%", secretary: "Camila Souza",
+    glossRisk: "4%", secretary: "Camila Souza",
   },
   {
     id: "d5", patient: "Roberto Nascimento", operadora: "SulAmérica",
     procedure: "Osteossíntese de platô tibial", code: "30725080",
     date: "2026-03-20", itemCount: 9, status: "approved" as const,
     statusLabel: "Aprovado", missingDocs: 0, hasOffenders: false,
-    rentability: "+21%", glossRisk: "3%", secretary: "Roberta Lima",
+    glossRisk: "3%", secretary: "Roberta Lima",
   },
 ];
 
 type Tab = "pending" | "approved";
 
 const DoctorHome = () => {
-  const { state, resetWizard, updateState } = useSurgical();
+  const { state, resetWizard, updateState, hospitalConfig } = useSurgical();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>("pending");
 
   // Settings state
-  const [globalMinRent, setGlobalMinRent] = useState(10);
+  const [globalMinHonorario, setGlobalMinHonorario] = useState(3000);
   const [globalMaxGloss, setGlobalMaxGloss] = useState(15);
   const [autoSendWithoutReview, setAutoSendWithoutReview] = useState(false);
   const [procedureThresholds, setProcedureThresholds] = useState<
-    { procedure: string; minRent: number; maxGloss: number }[]
+    { procedure: string; minHonorario: number; maxGloss: number }[]
   >([]);
 
   const availableProcedures = [...new Set(mockDoctorRequests.map((r) => r.procedure))];
 
   const addProcedureThreshold = (proc: string) => {
     if (!procedureThresholds.find((p) => p.procedure === proc)) {
-      setProcedureThresholds([...procedureThresholds, { procedure: proc, minRent: globalMinRent, maxGloss: globalMaxGloss }]);
+      setProcedureThresholds([...procedureThresholds, { procedure: proc, minHonorario: globalMinHonorario, maxGloss: globalMaxGloss }]);
     }
   };
 
@@ -135,11 +137,11 @@ const DoctorHome = () => {
                   <h3 className="text-sm font-semibold text-foreground mb-3">Parâmetros Gerais</h3>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <Label className="text-xs text-muted-foreground">Rentabilidade mínima (%)</Label>
+                      <Label className="text-xs text-muted-foreground">Honorário mínimo (R$)</Label>
                       <Input
                         type="number"
-                        value={globalMinRent}
-                        onChange={(e) => setGlobalMinRent(Number(e.target.value))}
+                        value={globalMinHonorario}
+                        onChange={(e) => setGlobalMinHonorario(Number(e.target.value))}
                         className="mt-1 h-9"
                       />
                     </div>
@@ -172,12 +174,12 @@ const DoctorHome = () => {
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <Label className="text-[10px] text-muted-foreground">Rent. mín. (%)</Label>
+                          <Label className="text-[10px] text-muted-foreground">Hon. mín. (R$)</Label>
                           <Input
                             type="number"
-                            value={pt.minRent}
+                            value={pt.minHonorario}
                             onChange={(e) => setProcedureThresholds(procedureThresholds.map((p) =>
-                              p.procedure === pt.procedure ? { ...p, minRent: Number(e.target.value) } : p
+                              p.procedure === pt.procedure ? { ...p, minHonorario: Number(e.target.value) } : p
                             ))}
                             className="mt-0.5 h-8 text-xs"
                           />
@@ -268,7 +270,10 @@ const DoctorHome = () => {
             <p className="text-sm">Nenhuma solicitação</p>
           </div>
         ) : (
-          items.map((req) => (
+          items.map((req) => {
+            const guia = mockGuias.find((g) => g.id === req.id);
+            const honorario = guia ? calcularGuiaMock(guia, hospitalConfig) : null;
+            return (
             <div
               key={req.id}
               className="w-full text-left glass-card rounded-xl overflow-hidden"
@@ -321,12 +326,17 @@ const DoctorHome = () => {
                 </div>
 
                 {/* Metrics bar */}
-                <div className="flex items-center gap-3 pt-2 border-t border-border/50">
-                  <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 rounded-full bg-success" />
-                    <span className="text-[10px] font-bold text-success">{req.rentability}</span>
-                    <span className="text-[9px] text-muted-foreground">rent.</span>
-                  </div>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 pt-2 border-t border-border/50">
+                  {honorario && (
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-primary" />
+                      <span className="text-[10px] font-bold text-primary tabular-nums whitespace-nowrap">{brl(honorario.honorarioTotal)}</span>
+                      <span className="text-[9px] text-muted-foreground">honorário</span>
+                      {honorario.honorarioComplementar > 0 && (
+                        <span className="text-[9px] font-semibold text-success tabular-nums whitespace-nowrap">({brlDelta(honorario.honorarioComplementar)})</span>
+                      )}
+                    </div>
+                  )}
                   <div className="flex items-center gap-1">
                     <div className={cn("w-2 h-2 rounded-full", parseInt(req.glossRisk) < 15 ? "bg-success" : "bg-warning")} />
                     <span className={cn("text-[10px] font-bold", parseInt(req.glossRisk) < 15 ? "text-success" : "text-warning")}>{req.glossRisk}</span>
@@ -339,7 +349,7 @@ const DoctorHome = () => {
                   )}
                   {req.missingDocs > 0 && (
                     <span className="badge-warning text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5 ml-auto">
-                      {req.missingDocs} doc(s)
+                      <span className="whitespace-nowrap">{req.missingDocs} doc(s)</span>
                     </span>
                   )}
                 </div>
@@ -364,7 +374,8 @@ const DoctorHome = () => {
                 </div>
               )}
             </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

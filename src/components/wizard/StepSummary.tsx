@@ -10,6 +10,9 @@ import {
 } from "lucide-react";
 import { mockLinkedProcedures, mockRecommendedOPMEs } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
+import { useRemuneracao } from "@/hooks/useRemuneracao";
+import { brl, brlDelta } from "@/lib/remuneracao";
+import { FaixaBadge, ComplementarValue } from "./items/HonorarioTags";
 
 const getItemVerdict = (name: string) => {
   const nameLower = name.toLowerCase();
@@ -32,7 +35,15 @@ const StepSummary = () => {
   const { state, saveRequest, resetWizard } = useSurgical();
   const navigate = useNavigate();
 
-  const rentColor = state.rentabilityScore > 15 ? "text-success" : state.rentabilityScore > 0 ? "text-warning" : "text-destructive";
+  const { calculo, honorarioDoProcedimento, complementarDoItem, faixaDoItem } = useRemuneracao();
+  const opmeList = state.selectedOpmes.length > 0
+    ? state.selectedOpmes.map((s, i) => ({
+        id: `sel-${i}`,
+        name: s.name,
+        supplier: mockRecommendedOPMEs.find((o) => o.name === s.name)?.supplier || "",
+        quantity: s.quantity,
+      }))
+    : state.extractedItems;
   const glossColor = state.glossRisk < 15 ? "text-success" : state.glossRisk < 30 ? "text-warning" : "text-destructive";
   const attachedDocs = state.documents.filter((d) => d.attached);
   const missingRequired = state.documents.filter((d) => d.required && !d.attached);
@@ -46,15 +57,15 @@ const StepSummary = () => {
     const tips: { text: string; impact: string; type: "rent" | "glosa" | "docs" }[] = [];
 
     // Check for offender items that could be swapped
-    const offenders = state.extractedItems.filter(item => {
+    const offenders = opmeList.filter(item => {
       const v = getItemVerdict(item.name);
       return v && (v.label === "Ofensor" || v.label === "Prejuízo");
     });
     if (offenders.length > 0) {
-      tips.push({ text: `Substitua ${offenders.length} item(ns) ofensor(es) por equivalentes técnicos`, impact: "+R$ 400~800", type: "rent" });
+      tips.push({ text: `Substitua ${offenders.length} item(ns) ofensor(es) por equivalentes técnicos da faixa A`, impact: "+honorário", type: "rent" });
     }
 
-    const glossItems = state.extractedItems.filter(item => {
+    const glossItems = opmeList.filter(item => {
       const v = getItemVerdict(item.name);
       return v && v.label === "Risco glosa";
     });
@@ -69,9 +80,9 @@ const StepSummary = () => {
     // Check if there are high-rent procedures not added
     const unusedHighRent = mockLinkedProcedures.filter(p => p.improvesRent && !p.isOfensor && !state.linkedProcedures.includes(p.code));
     if (unusedHighRent.length > 0) {
-      const totalPossible = unusedHighRent.reduce((a, p) => a + (parseInt(p.rentabilityDelta.replace(/[^\d-]/g, "")) || 0), 0);
+      const totalPossible = unusedHighRent.reduce((a, p) => a + honorarioDoProcedimento(p.code), 0);
       if (totalPossible > 0) {
-        tips.push({ text: `Adicione ${unusedHighRent.length} procedimento(s) secundário(s) disponíveis`, impact: `+R$ ${totalPossible}`, type: "rent" });
+        tips.push({ text: `Adicione ${unusedHighRent.length} procedimento(s) secundário(s) disponíveis`, impact: `${brlDelta(totalPossible)} honorário`, type: "rent" });
       }
     }
 
@@ -102,9 +113,12 @@ const StepSummary = () => {
       {/* Big numbers */}
       <div className="grid grid-cols-3 gap-3">
         <div className="glass-card rounded-xl p-4 text-center">
-          <TrendingUp className={`w-5 h-5 mx-auto mb-1 ${rentColor}`} />
-          <div className={`text-3xl font-extrabold tracking-tight ${rentColor}`}>+{state.rentabilityScore}%</div>
-          <div className="text-[10px] text-muted-foreground mt-0.5">Rentabilidade Estimada</div>
+          <TrendingUp className="w-5 h-5 mx-auto mb-1 text-primary" />
+          <div className="text-3xl font-extrabold tracking-tight text-primary tabular-nums">{brl(calculo.honorarioTotal)}</div>
+          <div className="text-[10px] text-muted-foreground mt-0.5">
+            Honorário médico · base {brl(calculo.honorarioBase)}
+            {calculo.honorarioComplementar > 0 && <span className="text-success font-semibold"> + {brl(calculo.honorarioComplementar)} complementar</span>}
+          </div>
         </div>
         <div className="glass-card rounded-xl p-4 text-center">
           <AlertTriangle className={`w-5 h-5 mx-auto mb-1 ${glossColor}`} />
@@ -171,8 +185,8 @@ const StepSummary = () => {
                 <span className="text-foreground">{proc.name}</span>
                 <span className="text-muted-foreground font-mono">{proc.code}</span>
               </div>
-              <span className={cn("font-bold tabular-nums", proc.rentabilityDelta.startsWith("+") ? "text-success" : "text-destructive")}>
-                {proc.rentabilityDelta}
+              <span className={cn("font-bold tabular-nums", honorarioDoProcedimento(proc.code) > 0 ? "text-primary" : "text-muted-foreground")}>
+                {honorarioDoProcedimento(proc.code) > 0 ? `${brlDelta(honorarioDoProcedimento(proc.code))} honorário` : "—"}
               </span>
             </div>
           ))}
@@ -183,11 +197,11 @@ const StepSummary = () => {
           <div className="flex items-center gap-2 mb-3">
             <Package className="w-4 h-4 text-primary" />
             <span className="text-xs font-bold text-foreground uppercase tracking-wider">
-              Itens OPME ({state.extractedItems.length})
+              Itens OPME ({opmeList.length})
             </span>
           </div>
           <div className="space-y-1">
-            {state.extractedItems.map((item) => {
+            {opmeList.map((item) => {
               const verdict = getItemVerdict(item.name);
               const Icon = verdict?.icon;
               return (
@@ -196,8 +210,10 @@ const StepSummary = () => {
                     {Icon && <Icon className={cn("w-3.5 h-3.5 shrink-0", verdict?.color)} />}
                     <span className="font-medium text-foreground truncate">{item.name}</span>
                     {item.supplier && <span className="text-muted-foreground shrink-0">· {item.supplier}</span>}
+                    <FaixaBadge faixa={faixaDoItem(item.name)} />
                   </div>
                   <div className="flex items-center gap-3 shrink-0 ml-2">
+                    <ComplementarValue value={complementarDoItem(item.name, item.quantity)} className="text-[10px]" />
                     {verdict && verdict.label !== "OK" && (
                       <span className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded-full border",
                         verdict.label === "Melhor opção" && "badge-success",

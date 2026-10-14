@@ -3,6 +3,8 @@ import { mockLinkedProcedures } from "@/lib/mockData";
 import { FileText, X, ArrowRight, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useRemuneracao } from "@/hooks/useRemuneracao";
+import { brl, brlDelta } from "@/lib/remuneracao";
 
 interface Props {
   selectedCodes: string[];
@@ -14,10 +16,7 @@ const GuiaCart = ({ selectedCodes, onRemove, onNext }: Props) => {
   const { state } = useSurgical();
   const selected = mockLinkedProcedures.filter((p) => selectedCodes.includes(p.code));
 
-  const totalRent = selected.reduce((acc, p) => {
-    const val = parseInt(p.rentabilityDelta.replace(/[^\d-]/g, "")) || 0;
-    return acc + val;
-  }, 0);
+  const { calculo, honorarioDoProcedimento } = useRemuneracao();
 
   return (
     <div className="w-[420px] shrink-0 border-l bg-card flex flex-col h-full">
@@ -81,9 +80,11 @@ const GuiaCart = ({ selectedCodes, onRemove, onNext }: Props) => {
                   </div>
                   <div className={cn(
                     "text-[10px] font-semibold mt-0.5",
-                    proc.rentabilityDelta.startsWith("+") ? "text-success" : "text-destructive"
+                    honorarioDoProcedimento(proc.code) > 0 ? "text-primary" : "text-muted-foreground"
                   )}>
-                    {proc.rentabilityDelta}
+                    {honorarioDoProcedimento(proc.code) > 0
+                      ? `${brlDelta(honorarioDoProcedimento(proc.code))} honorário`
+                      : "Sem honorário do cirurgião"}
                   </div>
                 </div>
                 <button
@@ -105,13 +106,8 @@ const GuiaCart = ({ selectedCodes, onRemove, onNext }: Props) => {
           <span className="font-bold text-foreground">{selected.length + 1}</span>
         </div>
         <div className="flex items-center justify-between text-xs mb-3">
-          <span className="text-muted-foreground">Impacto estimado</span>
-          <span className={cn(
-            "font-bold",
-            totalRent >= 0 ? "text-success" : "text-destructive"
-          )}>
-            {totalRent >= 0 ? "+" : ""}R$ {Math.abs(totalRent).toLocaleString("pt-BR")}
-          </span>
+          <span className="text-muted-foreground">Honorário médico</span>
+          <span className="font-bold text-primary tabular-nums">{brl(calculo.honorarioTotal)}</span>
         </div>
         <Button onClick={onNext} className="w-full h-10" disabled={selected.length === 0}>
           Próxima etapa <ArrowRight className="w-4 h-4 ml-2" />

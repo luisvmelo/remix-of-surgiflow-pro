@@ -8,6 +8,10 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useSurgical } from "@/contexts/SurgicalContext";
+import { mockGuias } from "@/lib/guias";
+import { brl, brlDelta, calcularGuia, complementarItem, honorarioVinculado, infoMatMed } from "@/lib/remuneracao";
+import { FaixaBadge } from "@/components/wizard/items/HonorarioTags";
 
 // Reuse same mock guides from detail page
 const mockGuideData: Record<string, any> = {
@@ -15,7 +19,7 @@ const mockGuideData: Record<string, any> = {
     procedure: "Artroscopia de Joelho — Meniscectomia", code: "30725119",
     rentability: 12, glossRisk: 8,
     suggestions: [
-      { text: "Adicionar Condroplastia pode aumentar rentabilidade em +R$ 820", type: "success" as const },
+      { text: "Condroplastia artroscópica soma honorário ao procedimento principal", type: "success" as const },
       { text: "Todos os itens conferidos — sem ofensores", type: "success" as const },
     ],
     procedures: [
@@ -35,7 +39,7 @@ const mockGuideData: Record<string, any> = {
     procedure: "Reconstrução de LCA", code: "30725097",
     rentability: 6, glossRisk: 22,
     suggestions: [
-      { text: "Substituir Implante Interferencial Titânio por PEEK — economia de R$ 520", type: "warning" as const },
+      { text: "Substituir Implante Interferencial Titânio por PEEK (faixa A) — menor glosa e honorário complementar", type: "warning" as const },
       { text: "Âncora Bio-Compósita é ofensor — considere Âncora PEEK 5.5mm", type: "warning" as const },
     ],
     procedures: [
@@ -53,7 +57,7 @@ const mockGuideData: Record<string, any> = {
     procedure: "Artroscopia de Ombro — Reparo do manguito", code: "30725038",
     rentability: 18, glossRisk: 5,
     suggestions: [
-      { text: "Excelente rentabilidade — acima do percentil 85", type: "success" as const },
+      { text: "Pacote dentro da padronização do hospital", type: "success" as const },
       { text: "Lâmina Shaver tem risco de glosa leve — monitorar", type: "info" as const },
     ],
     procedures: [
@@ -93,7 +97,8 @@ const availableItems = [
   { name: "Fio de Alta Resistência #2", supplier: "Arthrex", status: "ok" },
   { name: "Âncora PEEK 5.5mm", supplier: "Arthrex", status: "ok" },
   { name: "Lâmina Shaver Agressiva", supplier: "Smith & Nephew", status: "glosa" },
-  { name: "Implante Interferencial PEEK", supplier: "Arthrex", status: "ok" },
+  { name: "Implante Interferencial PEEK 7x23", supplier: "ConMed", status: "ok" },
+  { name: "Placa VA-LCP 3.5mm", supplier: "DePuy Synthes", status: "ok" },
   { name: "Dreno Portovac 3.2mm", supplier: "BBraun", status: "ok" },
 ];
 
@@ -114,6 +119,20 @@ const DoctorGuiaEdit = () => {
   const [items, setItems] = useState(guideData.items);
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddPanel, setShowAddPanel] = useState(false);
+
+  // Honorário recalculado a cada alteração
+  const { hospitalConfig } = useSurgical();
+  const guiaBase = mockGuias.find((g) => g.id === id) || mockGuias[0];
+  const calcDe = (procs: { code: string; type?: string }[], its: { name: string; qty: number }[]) => calcularGuia({
+    procedimentoCode: guiaBase.code,
+    operadoraId: guiaBase.operadoraId,
+    nivel: guiaBase.nivel,
+    vinculados: procs.filter((p) => p.type !== "principal").map((p) => p.code),
+    itens: its.map((i) => ({ name: i.name, quantity: i.qty })),
+  }, hospitalConfig);
+  const calc = calcDe(procedures, items);
+  const diferenca = calc.honorarioTotal - calcDe(guideData.procedures, guideData.items).honorarioTotal;
+  const honorarioProc = (code: string) => honorarioVinculado(code, guiaBase.operadoraId, guiaBase.nivel);
 
   const removeProcedure = (code: string) => {
     setProcedures((prev: any[]) => prev.filter((p: any) => p.code !== code || p.type === "principal"));
@@ -224,12 +243,17 @@ const DoctorGuiaEdit = () => {
         {/* Metrics bar */}
         <div className="grid grid-cols-2 gap-2 px-4 py-3">
           <div className="glass-card rounded-xl p-2.5 flex items-center gap-2">
-            <TrendingUp className={cn("w-4 h-4", guideData.rentability > 15 ? "text-success" : guideData.rentability > 0 ? "text-warning" : "text-destructive")} />
+            <TrendingUp className="w-4 h-4 text-primary" />
             <div>
-              <div className={cn("text-lg font-extrabold leading-none", guideData.rentability > 15 ? "text-success" : guideData.rentability > 0 ? "text-warning" : "text-destructive")}>
-                +{guideData.rentability}%
+              <div className="text-lg font-extrabold leading-none text-primary tabular-nums">{brl(calc.honorarioTotal)}</div>
+              <div className="text-[9px] text-muted-foreground">
+                Seu honorário
+                {diferenca !== 0 && (
+                  <span className={cn("ml-1 font-bold", diferenca > 0 ? "text-success" : "text-destructive")}>
+                    {brlDelta(diferenca)} com as alterações
+                  </span>
+                )}
               </div>
-              <div className="text-[9px] text-muted-foreground">Rentabilidade</div>
             </div>
           </div>
           <div className="glass-card rounded-xl p-2.5 flex items-center gap-2">
@@ -302,10 +326,9 @@ const DoctorGuiaEdit = () => {
                         <div className="text-[9px] text-muted-foreground font-mono">{proc.code}</div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0 ml-2">
-                        <span className={cn(
-                          "text-[10px] font-bold",
-                          proc.delta.startsWith("+") ? "text-success" : "text-destructive"
-                        )}>{proc.delta}</span>
+                        <span className="text-[10px] font-bold text-primary tabular-nums">
+                          {honorarioProc(proc.code) > 0 ? brlDelta(honorarioProc(proc.code)) : "—"}
+                        </span>
                         <Plus className="w-4 h-4 text-primary" />
                       </div>
                     </button>
@@ -326,6 +349,10 @@ const DoctorGuiaEdit = () => {
                         <div className="text-[9px] text-muted-foreground">{item.supplier}</div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0 ml-2">
+                        <FaixaBadge faixa={infoMatMed(item.name)?.faixa} />
+                        {complementarItem(item.name, 1, hospitalConfig) > 0 && (
+                          <span className="text-[10px] font-bold text-success tabular-nums">{brlDelta(complementarItem(item.name, 1, hospitalConfig))}/un.</span>
+                        )}
                         {item.status !== "ok" && statusBadge[item.status] && (
                           <span className={cn("text-[8px] px-1.5 py-0.5 rounded-full font-semibold", statusBadge[item.status].className)}>
                             {statusBadge[item.status].label}
@@ -365,11 +392,10 @@ const DoctorGuiaEdit = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-2">
-                  {proc.delta && (
-                    <span className={cn(
-                      "text-[10px] font-bold",
-                      proc.delta.startsWith("+") ? "text-success" : "text-destructive"
-                    )}>{proc.delta}</span>
+                  {proc.type !== "principal" && (
+                    <span className="text-[10px] font-bold text-primary tabular-nums">
+                      {honorarioProc(proc.code) > 0 ? brlDelta(honorarioProc(proc.code)) : "—"}
+                    </span>
                   )}
                   {proc.type === "principal" ? (
                     <span className="text-[9px] text-primary font-semibold bg-primary/10 px-1.5 py-0.5 rounded">Principal</span>
@@ -418,6 +444,12 @@ const DoctorGuiaEdit = () => {
 
                   <div className="flex items-center justify-between mt-2 ml-5">
                     <div className="flex items-center gap-1.5">
+                      <FaixaBadge faixa={infoMatMed(item.name)?.faixa} />
+                      {complementarItem(item.name, item.qty, hospitalConfig) > 0 && (
+                        <span className="text-[10px] font-bold text-success tabular-nums">
+                          {brlDelta(complementarItem(item.name, item.qty, hospitalConfig))}
+                        </span>
+                      )}
                       {badge && (
                         <span className={cn("text-[8px] px-1.5 py-0.5 rounded-full font-semibold", badge.className)}>
                           {badge.label}

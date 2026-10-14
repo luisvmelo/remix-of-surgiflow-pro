@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSurgical } from "@/contexts/SurgicalContext";
 import { mockPatients, mockOperadoras, mockProcedures } from "@/lib/mockData";
+import { niveisPlano, type NivelPlano } from "@/lib/remuneracao";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ const StepPatient = () => {
   const { state, updateState, setStep } = useSurgical();
   const [selectedPatient, setSelectedPatient] = useState(state.patient);
   const [operadoraId, setOperadoraId] = useState(state.operadora?.id || "");
+  const [planoNivel, setPlanoNivel] = useState<NivelPlano>(state.planoNivel);
   const [showNew, setShowNew] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editData, setEditData] = useState({ name: "", cpf: "", birthDate: "", phone: "" });
@@ -42,12 +44,13 @@ const StepPatient = () => {
 
   const handleNext = () => {
     const operadora = mockOperadoras.find((o) => o.id === operadoraId) || null;
-    const patient = selectedPatient || (showNew ? { id: "new", name: newData.name, cpf: newData.cpf, birthDate: newData.birthDate, phone: newData.phone, motherName: "", operadoraId } : null);
+    const patient = selectedPatient || (showNew ? { id: "new", name: newData.name, cpf: newData.cpf, birthDate: newData.birthDate, phone: newData.phone, motherName: "", planoNivel, operadoraId } : null);
     if (patient && operadora && selectedProc) {
       const isDoctorFlow = state.isDoctorFlow;
       updateState({
         patient,
         operadora,
+        planoNivel,
         selectedProcedure: selectedProc,
         currentStep: isDoctorFlow ? 2 : 2,
         rentabilityScore: 0,
@@ -70,7 +73,7 @@ const StepPatient = () => {
       {/* Patient Search */}
       <PatientSearch
         selectedPatient={selectedPatient}
-        onSelect={(p) => { setSelectedPatient(p); setOperadoraId(p.operadoraId); setShowNew(false); }}
+        onSelect={(p) => { setSelectedPatient(p); setOperadoraId(p.operadoraId); setPlanoNivel(p.planoNivel); setShowNew(false); }}
         onShowNew={() => { setShowNew(true); setSelectedPatient(null); }}
       />
 
@@ -105,18 +108,33 @@ const StepPatient = () => {
       )}
 
       {/* Operadora */}
-      <div className="glass-card rounded-xl p-5 mb-6">
-        <Label className="text-sm font-semibold mb-3 block">Operadora de Saúde *</Label>
-        <Select value={operadoraId} onValueChange={setOperadoraId}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Selecione a operadora" />
-          </SelectTrigger>
-          <SelectContent>
-            {mockOperadoras.map((op) => (
-              <SelectItem key={op.id} value={op.id}>{op.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="glass-card rounded-xl p-5 mb-6 grid grid-cols-1 sm:grid-cols-[2fr_1fr] gap-4">
+        <div>
+          <Label className="text-sm font-semibold mb-3 block">Operadora de Saúde *</Label>
+          <Select value={operadoraId} onValueChange={setOperadoraId}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecione a operadora" />
+            </SelectTrigger>
+            <SelectContent>
+              {mockOperadoras.map((op) => (
+                <SelectItem key={op.id} value={op.id}>{op.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-sm font-semibold mb-3 block">Nível do plano *</Label>
+          <Select value={planoNivel} onValueChange={(v) => setPlanoNivel(v as NivelPlano)}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {niveisPlano.map((n) => (
+                <SelectItem key={n} value={n}>{n}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Procedure Selection */}

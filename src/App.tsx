@@ -12,6 +12,7 @@ import Analises from "./pages/Analises";
 import DoctorHome from "./pages/doctor/DoctorHome";
 import DoctorGuiaDetail from "./pages/doctor/DoctorGuiaDetail";
 import DoctorGuiaEdit from "./pages/doctor/DoctorGuiaEdit";
+import HospitalHome from "./pages/hospital/HospitalHome";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/medico" element={<DoctorHome />} />
             <Route path="/medico/guia/:id" element={<DoctorGuiaDetail />} />
             <Route path="/medico/guia/:id/editar" element={<DoctorGuiaEdit />} />
+            <Route path="/hospital" element={<HospitalHome />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </HashRouter>

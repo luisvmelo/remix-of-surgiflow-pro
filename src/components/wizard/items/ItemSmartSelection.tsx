@@ -1,6 +1,8 @@
 import { mockRecommendedOPMEs } from "@/lib/mockData";
 import { Zap, History, TrendingUp, Check, ArrowRight, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRemuneracao } from "@/hooks/useRemuneracao";
+import { brlDelta } from "@/lib/remuneracao";
 
 interface SelectedItem {
   name: string;
@@ -30,13 +32,6 @@ const historicalItems = mockRecommendedOPMEs
     return bVal - aVal;
   });
 
-const bestRentTotal = bestRentItems.reduce((acc, item) => {
-  return acc + (parseInt(item.impactDelta.replace(/[^\d-]/g, "")) || 0);
-}, 0);
-
-const historicalTotal = historicalItems.reduce((acc, item) => {
-  return acc + (parseInt(item.impactDelta.replace(/[^\d-]/g, "")) || 0);
-}, 0);
 
 const avgGlossRent = Math.round(
   bestRentItems.filter((i) => i.isGlosado).length / (bestRentItems.length || 1) * 100
@@ -46,6 +41,9 @@ const avgGlossHist = Math.round(
 );
 
 const ItemSmartSelection = ({ selectedItems, onApplyAll }: Props) => {
+  const { complementarDoItem } = useRemuneracao();
+  const bestRentTotal = bestRentItems.reduce((acc, item) => acc + complementarDoItem(item.name), 0);
+  const historicalTotal = historicalItems.reduce((acc, item) => acc + complementarDoItem(item.name), 0);
   const isRentApplied = bestRentItems.every((item) =>
     selectedItems.some((s) => s.name === item.name)
   );
@@ -100,7 +98,7 @@ const ItemSmartSelection = ({ selectedItems, onApplyAll }: Props) => {
                 {isRentApplied ? <Check className="w-4 h-4 text-success" /> : <TrendingUp className="w-4 h-4 text-success" />}
               </div>
               <div>
-                <div className="text-xs font-bold text-foreground">Maior Rentabilidade</div>
+                <div className="text-xs font-bold text-foreground">Recomendado</div>
                 <div className="text-[10px] text-muted-foreground">{bestRentItems.length} itens</div>
               </div>
             </div>
@@ -116,7 +114,8 @@ const ItemSmartSelection = ({ selectedItems, onApplyAll }: Props) => {
 
             <div className="flex items-center justify-between pt-2 border-t border-border/50">
               <div>
-                <span className="text-lg font-extrabold text-success tabular-nums">+R$ {bestRentTotal.toLocaleString("pt-BR")}</span>
+                <span className="text-lg font-extrabold text-success tabular-nums">{brlDelta(bestRentTotal)}</span>
+                <div className="text-[10px] text-muted-foreground">no honorário</div>
                 <div className="text-[10px] text-muted-foreground">Risco glosa: {avgGlossRent}%</div>
               </div>
               {!isRentApplied && (
@@ -167,7 +166,8 @@ const ItemSmartSelection = ({ selectedItems, onApplyAll }: Props) => {
 
             <div className="flex items-center justify-between pt-2 border-t border-border/50">
               <div>
-                <span className="text-lg font-extrabold text-primary tabular-nums">+R$ {historicalTotal.toLocaleString("pt-BR")}</span>
+                <span className="text-lg font-extrabold text-primary tabular-nums">{brlDelta(historicalTotal)}</span>
+                <div className="text-[10px] text-muted-foreground">no honorário</div>
                 <div className="text-[10px] text-muted-foreground">Risco glosa: {avgGlossHist}%</div>
               </div>
               {!isHistApplied && (

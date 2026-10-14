@@ -7,6 +7,7 @@ import StepDocuments from "@/components/wizard/StepDocuments";
 import StepSummary from "@/components/wizard/StepSummary";
 import StepPackageReview from "@/components/wizard/StepPackageReview";
 import { Activity } from "lucide-react";
+import WizardExitButton from "@/components/wizard/WizardExitButton";
 
 const stepComponents = [
   null, // step 0 not rendered here
@@ -36,6 +37,7 @@ const Wizard = () => {
               </span>
             )}
           </div>
+          <WizardExitButton />
         </header>
         <main className="flex-1 overflow-hidden">
           <div className="animate-fade-in h-full">
@@ -62,6 +64,7 @@ const Wizard = () => {
             </span>
           )}
         </div>
+        <WizardExitButton />
       </header>
 
       <div className="flex flex-1 overflow-hidden">
